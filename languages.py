@@ -1,5 +1,5 @@
 import configparser
-
+import warnings
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -10,6 +10,13 @@ SELECTED_LANGUAGE = config['LANGUAGE']['selected_language']
 class LanguageNotImplemented(Exception):
     pass
 
+
+class EnglishMissingError(Exception):
+    pass
+
+
+class MissingTranslationWarning(Warning):
+    pass
 
 SUPPORTED_LANGUAGES = set()
 
@@ -39,8 +46,28 @@ if SELECTED_LANGUAGE not in SUPPORTED_LANGUAGES:
 
 class Message(str):
     def __new__(cls, texts_dct):
-        inst = str.__new__(cls, texts_dct[SELECTED_LANGUAGE])
+        if english not in texts_dct:
+            raise EnglishMissingError
+        if SELECTED_LANGUAGE in texts_dct:
+            s = texts_dct[SELECTED_LANGUAGE]
+        else:
+            s = texts_dct[english]
+            warnings.warn("""Missing some translations in {} (will use english instead).
+            Check `languages` module for more details.
+            """.format(SELECTED_LANGUAGE),
+                          MissingTranslationWarning)
+        inst = str.__new__(cls, s)
         return inst
+
+
+# Template
+"""
+Message(
+    texts_dct={
+        english: ,
+        greek: ,
+    })
+"""
 
 
 ABOUT = Message(
@@ -49,3 +76,8 @@ ABOUT = Message(
         greek: 'Σχετικά',
     })
 
+SOLVE_FOR_X_QUESTION = Message(
+    texts_dct={
+        english: 'Find the value of x.',
+        greek: 'Βρες την τιμή του x.',
+    })
