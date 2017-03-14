@@ -1,5 +1,5 @@
 import random
-from main import UnexpectedValueError
+from never_importer import UnexpectedValueError
 from sympy import sympify
 
 
