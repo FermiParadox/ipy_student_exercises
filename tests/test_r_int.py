@@ -1,9 +1,7 @@
 import random
 from unittest import TestCase
 from tests import REPETITIONS
-from random_pieces import r_int
-from random_pieces import _ALLOWED_POS_NEG_0
-from random_pieces import UnexpectedValueError
+from random_pieces import r_int, _ALLOWED_POS_NEG_0, UnexpectedValueError
 
 
 class Test_r_int(TestCase):

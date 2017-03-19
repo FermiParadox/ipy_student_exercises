@@ -31,15 +31,30 @@ class Exercise(metaclass=abc.ABCMeta):
         pass
 
 
-def solve_1rst_degree_poly(eq):
-    # Sympy Eq returns 0 when the the generated expression is 0x=0 ...
-    if eq == 0:
-        return 'any Real'
-    # ... and [] when it's 0x=4.
-    elif eq is False:
-        return []
+class AnyNumber(object):
+    pass
+
+
+class NoSolution(object):
+    pass
+
+
+def solve_1rst_degree_poly(expr):
+    """Returns the solution of a linear polynomial equation.
+
+    WARNING: A `sympy.Eq(stmt)` output needs to be provided (not `sympy.Eq(stmt1, stmt2)`,
+        since this method takes into account its peculiarities.
+    """
+    eq = sympy.Eq(expr)
+    # `sympy.Eq` returns True (sympy-type True)
+    # when the the generated expression is 2x-2x=0 or 0x=0,
+    # and False when 0x=4.
+    if eq is sympify(True):
+        return AnyNumber()
+    elif eq is sympify(False):
+        return NoSolution()
     else:
-        return sympy.solve(eq, x)
+        return sympy.solve(eq, x)[0]
 
 
 class SolveForX(Exercise):
@@ -73,24 +88,22 @@ class SolveForX(Exercise):
 
     @staticmethod
     def _x_terms_strings(x_terms):
-        return {'{}*x'.format(r_int(10, '-+')) for _ in range(x_terms)}
+        return ['{}*x'.format(r_int(10, '-+')) for _ in range(x_terms)]
 
     @staticmethod
     def _non_x_terms_strings(non_x_terms):
-        return {str(r_int(10, '-+')) for _ in range(non_x_terms)}
+        return [str(r_int(10, '-+')) for _ in range(non_x_terms)]
 
     @staticmethod
     def _hard_diff_left_and_right(x_terms, non_x_terms):
         x_terms_strings = SolveForX._x_terms_strings(x_terms)
         non_x_terms_strings = SolveForX._non_x_terms_strings(non_x_terms)
-        mixed = list(x_terms_strings | non_x_terms_strings)
+        mixed = x_terms_strings + non_x_terms_strings
 
         left_side_terms_num = random.randint(0, len(mixed))
 
         left_side_terms = mixed[:left_side_terms_num]
-        left_side_terms = left_side_terms or ['0', ]
         right_side_terms = mixed[left_side_terms_num:]
-        right_side_terms = right_side_terms or ['0', ]
 
         left_side = '+'.join(left_side_terms)
         right_side = '+'.join(right_side_terms)
@@ -105,15 +118,19 @@ class SolveForX(Exercise):
             left_side = '{a}*x + {b}'.format(a=a, b=b)
             right_side = '0'
         elif d == 2:
-            # Integer solution
-            a = r_int(5, '-+')
-            b = r_int(10, '-+') * a
+            # Real solution/no solution/infinite solutions
+            a = r_int(10, '-+0')
+            b = r_int(10, '-+0')
             left_side = '{a}*x + {b}'.format(a=a, b=b)
             right_side = '0'
         else:
             # Real solution/no solution/infinite solutions, any number of terms.
             left_side, right_side = self._hard_diff_left_and_right(x_terms=self.x_terms,
                                                                    non_x_terms=self.non_x_terms)
+
+            # Add '0' if the side is empty.
+            left_side = left_side or '0'
+            right_side = right_side or '0'
         final_string = ' = '.join([left_side, right_side])
         final_string = final_string.replace('+-', '-')
         return final_string
@@ -122,22 +139,22 @@ class SolveForX(Exercise):
         left_str, right_str = self.question.replace(' ', '').split('=')
         left_sympified = sympify(left_str)
         right_sympified = sympify(right_str)
-        eq = left_sympified - right_sympified
-        return solve_1rst_degree_poly(eq)
+        expr = left_sympified - right_sympified
+        return solve_1rst_degree_poly(expr)
 
     def _answer_types(self):
-        return {sympify('1'), sympify('-1/2')}
+        return {sympy.Number, AnyNumber, NoSolution}
 
 
 if __name__ == '__main__':
-    inst = SolveForX(difficulty=3)
-    print(inst.question)
-    print(inst.answer)
+    _inst = SolveForX(difficulty=3)
+    print(_inst.question)
+    print(_inst.answer)
     while 1:
-        inst = SolveForX(difficulty=3)
-        q = inst.question
-        a = inst.answer
-        if a == 'any Real':
-            print(q)
-            print(a)
+        _inst = SolveForX(difficulty=2)
+        _ques = _inst.question
+        _ans = _inst.answer
+        if _ans == AnyNumber:
+            print(_ques)
+            print(_ans)
             break
