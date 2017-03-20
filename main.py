@@ -33,10 +33,12 @@ class Exercise(metaclass=abc.ABCMeta):
 
 class AnyNumber(object):
     pass
+ANY_NUMBER = AnyNumber()
 
 
 class NoSolution(object):
     pass
+NO_SOLUTION = NoSolution()
 
 
 def solve_1rst_degree_poly(expr):
@@ -50,9 +52,9 @@ def solve_1rst_degree_poly(expr):
     # when the the generated expression is 2x-2x=0 or 0x=0,
     # and False when 0x=4.
     if eq is sympify(True):
-        return AnyNumber()
+        return ANY_NUMBER
     elif eq is sympify(False):
-        return NoSolution()
+        return NO_SOLUTION
     else:
         return sympy.solve(eq, x)[0]
 
@@ -65,8 +67,9 @@ class SolveForX(Exercise):
     Fractional or decimal solutions should be kept for harder difficulty.
     """
     ALLOWED_DIFFICULTIES = {1, 2, 3}
+    DEFAULT_TERM_N_ON_HIGH_DIFF = 3
 
-    def __init__(self, difficulty=1, x_terms=2, non_x_terms=2):
+    def __init__(self, difficulty=1, x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF, non_x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF):
         """
         :param difficulty: Defines number of terms (if not provided)
             and type of solution (int, fraction etc)
@@ -76,7 +79,7 @@ class SolveForX(Exercise):
         if difficulty not in self.ALLOWED_DIFFICULTIES:
             raise UnexpectedValueError('Difficulty {}, not allowed'.format(difficulty))
         if difficulty != max(self.ALLOWED_DIFFICULTIES):
-            if (x_terms != 2) or (non_x_terms != 2):
+            if (x_terms != self.DEFAULT_TERM_N_ON_HIGH_DIFF) or (non_x_terms != self.DEFAULT_TERM_N_ON_HIGH_DIFF):
                 raise UnexpectedValueError("Number of terms can be set manually only on highest difficulty.")
         self.difficulty = difficulty
         self.x_terms = x_terms
@@ -99,6 +102,7 @@ class SolveForX(Exercise):
         x_terms_strings = SolveForX._x_terms_strings(x_terms)
         non_x_terms_strings = SolveForX._non_x_terms_strings(non_x_terms)
         mixed = x_terms_strings + non_x_terms_strings
+        random.shuffle(mixed)
 
         left_side_terms_num = random.randint(0, len(mixed))
 
@@ -154,7 +158,7 @@ if __name__ == '__main__':
         _inst = SolveForX(difficulty=2)
         _ques = _inst.question
         _ans = _inst.answer
-        if _ans == AnyNumber:
+        if isinstance(_ans, AnyNumber):
             print(_ques)
             print(_ans)
             break
