@@ -1,8 +1,12 @@
 import configparser
 import warnings
 
+import never_importer
+
+
 config = configparser.ConfigParser()
-config.read('config.ini')
+CONFIG_PATH = never_importer.PROJECT_PATH + '/config.ini'
+config.read(CONFIG_PATH)
 
 SELECTED_LANGUAGE = config['LANGUAGE']['selected_language']
 
@@ -52,10 +56,10 @@ class Message(str):
             s = texts_dct[SELECTED_LANGUAGE]
         else:
             s = texts_dct[english]
-            warnings.warn("""Missing some translations in {} (will use english instead).
-            Check `languages` module for more details.
-            """.format(SELECTED_LANGUAGE),
-                          MissingTranslationWarning)
+            warnings.warn(
+                """Missing some translations in {} (will use english instead).
+                Check corresponding module.""".format(SELECTED_LANGUAGE),
+                MissingTranslationWarning)
         inst = str.__new__(cls, s)
         return inst
 
@@ -66,6 +70,13 @@ Message(
     texts_dct={
         english: ,
         greek: ,
+    })
+
+
+Message(
+    texts_dct={
+        languages.english: ,
+        languages.greek: ,
     })
 """
 

@@ -1,8 +1,12 @@
 import sympy
 import random
 import abc
+
+import languages
+
 from sympy.abc import x
 from sympy import sympify
+
 from random_pieces import r_int
 from never_importer import UnexpectedValueError
 
@@ -59,7 +63,7 @@ def solve_1rst_degree_poly(expr):
         return sympy.solve(eq, x)[0]
 
 
-class SolveForX(Exercise):
+class SolveForXLinear(Exercise):
     """
     Example:
     3x + 2 = 0
@@ -68,6 +72,11 @@ class SolveForX(Exercise):
     """
     ALLOWED_DIFFICULTIES = {1, 2, 3}
     DEFAULT_TERM_N_ON_HIGH_DIFF = 3
+    QUESTION_TITLE = languages.Message(
+        texts_dct={
+            languages.english: 'Find the value of x.',
+            languages.greek: 'Βρες την τιμή του x.',
+        })
 
     def __init__(self, difficulty=1, x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF, non_x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF):
         """
@@ -87,7 +96,7 @@ class SolveForX(Exercise):
         super().__init__()
 
     def _question_title(self):
-        pass
+        return self.QUESTION_TITLE
 
     @staticmethod
     def _x_terms_strings(x_terms):
@@ -99,8 +108,8 @@ class SolveForX(Exercise):
 
     @staticmethod
     def _hard_diff_left_and_right(x_terms, non_x_terms):
-        x_terms_strings = SolveForX._x_terms_strings(x_terms)
-        non_x_terms_strings = SolveForX._non_x_terms_strings(non_x_terms)
+        x_terms_strings = SolveForXLinear._x_terms_strings(x_terms)
+        non_x_terms_strings = SolveForXLinear._non_x_terms_strings(non_x_terms)
         mixed = x_terms_strings + non_x_terms_strings
         random.shuffle(mixed)
 
@@ -151,11 +160,11 @@ class SolveForX(Exercise):
 
 
 if __name__ == '__main__':
-    _inst = SolveForX(difficulty=3)
+    _inst = SolveForXLinear(difficulty=3)
     print(_inst.question)
     print(_inst.answer)
     while 1:
-        _inst = SolveForX(difficulty=2)
+        _inst = SolveForXLinear(difficulty=2)
         _ques = _inst.question
         _ans = _inst.answer
         if isinstance(_ans, AnyNumber):
