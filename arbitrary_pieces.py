@@ -1,10 +1,29 @@
 import random
+import re
+
+import sympy
+from sympy.abc import x
+
 from never_importer import UnexpectedValueError
 from sympy import sympify
 
 
 _ALLOWED_POS_NEG_0 = set('+-0')
 _MANDATORY_POS_NEG_0 = _ALLOWED_POS_NEG_0 - {'0'}
+
+
+class SpecialAnswerType(object):
+    pass
+
+
+class AnyNumber(SpecialAnswerType):
+    button_text = 'Any number.'
+ANY_NUMBER = AnyNumber()
+
+
+class NoSolution(SpecialAnswerType):
+    button_text = 'No solution.'
+NO_SOLUTION = NoSolution()
 
 
 def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
@@ -55,7 +74,34 @@ def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
     return random.choice(list(nums))
 
 
-if __name__ == '__main__':
+def sometimes_replace_1x_with_x(expr, var_name):
+    """
+    Half of the time converts "1x" to "x".
+    "31x" will always remain the same.
+    """
+    if random.choice([0, 1]):
+        expr = re.sub(r'(?<![0-9])1{}'.format(var_name), r'{}'.format(var_name), expr)
+    return expr
 
+
+def solve_1rst_degree_poly(expr):
+    """Returns the solution of a linear polynomial equation.
+
+    WARNING: A `sympy.Eq(stmt)` output needs to be provided (not `sympy.Eq(stmt1, stmt2)`,
+        since this method takes into account its peculiarities.
+    """
+    eq = sympy.Eq(expr)
+    # `sympy.Eq` returns True (sympy-type True)
+    # when the the generated expression is 2x-2x=0 or 0x=0,
+    # and False when 0x=4.
+    if eq is sympify(True):
+        return ANY_NUMBER
+    elif eq is sympify(False):
+        return NO_SOLUTION
+    else:
+        return sympy.solve(eq, x)[0]
+
+
+if __name__ == '__main__':
     n = r_int(2, '-', (-1,))
     print(n)

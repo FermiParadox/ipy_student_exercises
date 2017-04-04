@@ -1,20 +1,25 @@
-import sympy
-import random
 import abc
+import random
+
+import sympy
+from sympy import sympify
+from IPython.display import display
+
 
 import languages
-
-from sympy.abc import x
-from sympy import sympify
-
-from random_pieces import r_int
 from never_importer import UnexpectedValueError
+from arbitrary_pieces import r_int, solve_1rst_degree_poly, AnyNumber, NoSolution
+from qa_display_widgets import QADisplayBox, FillGapsBox
 
 
 class Exercise(metaclass=abc.ABCMeta):
-    def __init__(self):
-        self.question = self._question()
+    def __init__(self, display_class):
+        if not issubclass(self.DEFAULT_DISPLAY_CLASS, QADisplayBox):
+            raise UnexpectedValueError('{}'.format(self.DEFAULT_DISPLAY_CLASS))
+        self.display_class = display_class
         self.question_title = self._question_title()
+        self.question = self._question()
+        self.question_in_latex = self._question_in_latex()
         self.answer = self._answer()
         self.answer_types = self._answer_types()
 
@@ -27,6 +32,10 @@ class Exercise(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def _question_in_latex(self):
+        pass
+
+    @abc.abstractmethod
     def _answer(self):
         pass
 
@@ -34,33 +43,13 @@ class Exercise(metaclass=abc.ABCMeta):
     def _answer_types(self):
         pass
 
+    @abc.abstractproperty
+    def DEFAULT_DISPLAY_CLASS(self):
+        pass
 
-class AnyNumber(object):
-    pass
-ANY_NUMBER = AnyNumber()
-
-
-class NoSolution(object):
-    pass
-NO_SOLUTION = NoSolution()
-
-
-def solve_1rst_degree_poly(expr):
-    """Returns the solution of a linear polynomial equation.
-
-    WARNING: A `sympy.Eq(stmt)` output needs to be provided (not `sympy.Eq(stmt1, stmt2)`,
-        since this method takes into account its peculiarities.
-    """
-    eq = sympy.Eq(expr)
-    # `sympy.Eq` returns True (sympy-type True)
-    # when the the generated expression is 2x-2x=0 or 0x=0,
-    # and False when 0x=4.
-    if eq is sympify(True):
-        return ANY_NUMBER
-    elif eq is sympify(False):
-        return NO_SOLUTION
-    else:
-        return sympy.solve(eq, x)[0]
+    def display(self):
+        d_class = self.display_class or self.DEFAULT_DISPLAY_CLASS
+        display(d_class(self).box())
 
 
 class SolveForXLinear(Exercise):
@@ -72,16 +61,15 @@ class SolveForXLinear(Exercise):
     """
     ALLOWED_DIFFICULTIES = {1, 2, 3}
     DEFAULT_TERM_N_ON_HIGH_DIFF = 3
-    QUESTION_TITLE = languages.Message(
-        texts_dct={
-            languages.english: 'Find the value of x.',
-            languages.greek: 'Βρες την τιμή του x.',
-        })
+    VARIABLE_NAME = 'x'
+    DEFAULT_DISPLAY_CLASS = FillGapsBox
 
-    def __init__(self, difficulty=1, x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF, non_x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF):
+    def __init__(self, difficulty=1, var_name='x', display_class=None,
+                 x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF, non_x_terms=DEFAULT_TERM_N_ON_HIGH_DIFF):
         """
         :param difficulty: Defines number of terms (if not provided)
             and type of solution (int, fraction etc)
+        :param var_name: Name of variable.
         :param x_terms: number of terms containing x
         :param non_x_terms: number of terms not containing x
         """
@@ -91,12 +79,17 @@ class SolveForXLinear(Exercise):
             if (x_terms != self.DEFAULT_TERM_N_ON_HIGH_DIFF) or (non_x_terms != self.DEFAULT_TERM_N_ON_HIGH_DIFF):
                 raise UnexpectedValueError("Number of terms can be set manually only on highest difficulty.")
         self.difficulty = difficulty
+        self.var_name = var_name
         self.x_terms = x_terms
         self.non_x_terms = non_x_terms
-        super().__init__()
+        super().__init__(display_class=display_class)
 
     def _question_title(self):
-        return self.QUESTION_TITLE
+        return languages.Message(
+            texts_dct={
+                languages.english: 'Find the value of {}.'.format(self.var_name),
+                languages.greek: 'Βρες την τιμή του {}.'.format(self.var_name),
+            })
 
     @staticmethod
     def _x_terms_strings(x_terms):
@@ -146,14 +139,18 @@ class SolveForXLinear(Exercise):
             right_side = right_side or '0'
         final_string = ' = '.join([left_side, right_side])
         final_string = final_string.replace('+-', '-')
-        return final_string
+        return final_string.replace('x', self.var_name)
 
     def _answer(self):
         left_str, right_str = self.question.replace(' ', '').split('=')
         left_sympified = sympify(left_str)
         right_sympified = sympify(right_str)
         expr = left_sympified - right_sympified
-        return solve_1rst_degree_poly(expr)
+        ans = solve_1rst_degree_poly(expr)
+        return {self.VARIABLE_NAME: ans}
+
+    def _question_in_latex(self):
+        return '${}$'.format(self.question.replace('*', ''))
 
     def _answer_types(self):
         return {sympy.Number, AnyNumber, NoSolution}
