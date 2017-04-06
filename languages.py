@@ -81,13 +81,13 @@ Message(
 """
 
 
-ABOUT = Message(
+ABOUT_MSG = Message(
     texts_dct={
         english: 'About',
         greek: 'Σχετικά',
     })
 
-SOLVE_FOR_X_QUESTION = Message(
+SOLVE_FOR_X_QUESTION_MSG = Message(
     texts_dct={
         english: 'Find the value of x.',
         greek: 'Βρες την τιμή του x.',

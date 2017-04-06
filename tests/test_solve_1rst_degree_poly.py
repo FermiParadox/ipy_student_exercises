@@ -7,13 +7,12 @@ class Test_solve_1rst_degree_poly(TestCase):
     def test_one_solution(self):
         from sympy.abc import x
         sol = solve_1rst_degree_poly(expr=4*x+2)
-        self.assertTrue(sol)    # Non empty
         self.assertIsNot(sol, AnyNumber)
 
     def test_no_solution(self):
         from sympy.abc import x
         sol = solve_1rst_degree_poly(expr=0*x-2)
-        self.assertIsInstance(sol, NoSolution)    # Empty
+        self.assertIsInstance(sol, NoSolution)
 
     def test_any_number_is_solution(self):
         from sympy.abc import x
