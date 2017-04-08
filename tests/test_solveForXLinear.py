@@ -1,7 +1,7 @@
 import re
 from unittest import TestCase
 
-from main import SolveForXLinear
+from exercises import SolveForXLinear
 from tests import REPETITIONS
 
 

@@ -12,6 +12,14 @@ _ALLOWED_POS_NEG_0 = set('+-0')
 _MANDATORY_POS_NEG_0 = _ALLOWED_POS_NEG_0 - {'0'}
 
 
+def class_children(cls):
+    s = set()
+    for subc in cls.__subclasses__():
+        s.add(subc)
+        s.update(class_children(cls=subc))
+    return s
+
+
 class SpecialAnswerType(object):
     pass
 
@@ -26,6 +34,10 @@ class NoSolution(SpecialAnswerType):
 NO_SOLUTION = NoSolution()
 
 
+SPECIAL_ANSWERS_TYPES = tuple(class_children(SpecialAnswerType))
+
+
+# --------------------------------------------------------------------------------------------------------
 def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
     """
     Return random integer within bounds, excluding a list of ints.
@@ -105,3 +117,5 @@ def solve_1rst_degree_poly(expr):
 if __name__ == '__main__':
     n = r_int(2, '-', (-1,))
     print(n)
+
+    print(SPECIAL_ANSWERS_TYPES)

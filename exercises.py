@@ -1,14 +1,15 @@
 import abc
 import random
-
 import sympy
+import mpmath
+
 from sympy import sympify
 from IPython.display import display
 
 
 import languages
 from never_importer import UnexpectedValueError
-from arbitrary_pieces import r_int, solve_1rst_degree_poly, AnyNumber, NoSolution
+from arbitrary_pieces import r_int, solve_1rst_degree_poly, AnyNumber, NoSolution, SPECIAL_ANSWERS_TYPES
 from qa_display_widgets import QADisplayBox, FillGapsBox
 
 
@@ -55,26 +56,33 @@ class Exercise(metaclass=abc.ABCMeta):
     def _is_valid_answer(answer, allowed_answer_types):
         types_tuple = tuple(allowed_answer_types)
         # Covers special answer types like "AnyNumber"
-        if isinstance(answer, types_tuple):
-            return True
+        if isinstance(answer, SPECIAL_ANSWERS_TYPES):
+            return isinstance(answer, types_tuple)
         # Otherwise, it must be sympified before checked.
         else:
             try:
-                if isinstance(sympify(answer, evaluate=False), types_tuple):
-                    return True
+                sympified_a = sympify(answer, evaluate=False)
+                return isinstance(sympified_a, types_tuple)
             except sympy.SympifyError:
-                pass
-
-        return False
+                return False
 
     @staticmethod
     def _is_correct_answer(answer, expected_answer):
+        """
+        Checks if answer is correct.
+
+        WARNING: Assumes answer is "valid" as defined above.
+        """
         if answer == expected_answer:
             return True
-        elif sympify(answer, evaluate=False) == sympify(expected_answer, evaluate=False):
-            return True
         else:
-            return False
+            try:
+                if mpmath.almosteq(sympify(answer), sympify(expected_answer), rel_eps=0.001):
+                    return True
+            except sympy.SympifyError:
+                return False
+
+        return False
 
     @staticmethod
     def is_correct_and_valid_answer(answer, expected_answer, allowed_answer_types):
