@@ -8,6 +8,7 @@ from IPython.display import display
 
 
 import languages
+import arbitrary_pieces
 from never_importer import UnexpectedValueError
 from arbitrary_pieces import r_int, solve_1rst_degree_poly, AnyNumber, NoSolution, SPECIAL_ANSWERS_TYPES
 from qa_display_widgets import QADisplayBox, FillGapsBox
@@ -53,11 +54,15 @@ class Exercise(metaclass=abc.ABCMeta):
         display(displ_class(self).box())
 
     @staticmethod
-    def _is_valid_answer(answer, allowed_answer_types):
+    def _is_special_or_sympifiable_answer(answer, allowed_answer_types):
+        """Checks if answer is either special-type or sympifiable."""
         types_tuple = tuple(allowed_answer_types)
         # Covers special answer types like "AnyNumber"
         if isinstance(answer, SPECIAL_ANSWERS_TYPES):
             return isinstance(answer, types_tuple)
+        # Consecutive ops are not allowed
+        elif arbitrary_pieces.consecutive_operators_search(expr=str(answer)):
+            return False
         # Otherwise, it must be sympified before checked.
         else:
             try:
@@ -86,7 +91,7 @@ class Exercise(metaclass=abc.ABCMeta):
 
     @staticmethod
     def is_correct_and_valid_answer(answer, expected_answer, allowed_answer_types):
-        if Exercise._is_valid_answer(answer=answer, allowed_answer_types=allowed_answer_types):
+        if Exercise._is_special_or_sympifiable_answer(answer=answer, allowed_answer_types=allowed_answer_types):
             if Exercise._is_correct_answer(answer=answer, expected_answer=expected_answer):
                 return True
         return False

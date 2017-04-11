@@ -1,17 +1,33 @@
 import random
 import re
-
+import itertools
 import sympy
 from sympy.abc import x
 
 from never_importer import UnexpectedValueError
-from sympy import sympify
 
 
-_ALLOWED_POS_NEG_0 = set('+-0')
-_MANDATORY_POS_NEG_0 = _ALLOWED_POS_NEG_0 - {'0'}
+# ---------------------------------------------------------------------------------
+def delimiter(num_of_lines, line_type='-'):
+    """
+    Creates a newline and then a long line string.
+    """
+
+    string = '\n'
+    string += line_type * num_of_lines
+
+    return string
 
 
+def fat_delimiter(num_of_lines):
+    return delimiter(num_of_lines=num_of_lines, line_type='=')
+
+
+def print_delimiter(num_of_lines=80, line_type='='):
+    print(delimiter(num_of_lines=num_of_lines, line_type=line_type))
+
+
+# ---------------------------------------------------------------------------------
 def class_children(cls):
     s = set()
     for subc in cls.__subclasses__():
@@ -20,24 +36,11 @@ def class_children(cls):
     return s
 
 
-class SpecialAnswerType(object):
-    pass
+# ---------------------------------------------------------------------------------
+_ALLOWED_POS_NEG_0 = set('+-0')
+_MANDATORY_POS_NEG_0 = _ALLOWED_POS_NEG_0 - {'0'}
 
 
-class AnyNumber(SpecialAnswerType):
-    button_text = 'Any number.'
-ANY_NUMBER = AnyNumber()
-
-
-class NoSolution(SpecialAnswerType):
-    button_text = 'No solution.'
-NO_SOLUTION = NoSolution()
-
-
-SPECIAL_ANSWERS_TYPES = tuple(class_children(SpecialAnswerType))
-
-
-# --------------------------------------------------------------------------------------------------------
 def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
     """
     Return random integer within bounds, excluding a list of ints.
@@ -86,6 +89,7 @@ def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
     return random.choice(list(nums))
 
 
+# ---------------------------------------------------------------------------------
 def sometimes_replace_1x_with_x(expr, var_name):
     """
     Half of the time converts "1x" to "x".
@@ -96,6 +100,7 @@ def sometimes_replace_1x_with_x(expr, var_name):
     return expr
 
 
+# ---------------------------------------------------------------------------------
 def solve_1rst_degree_poly(expr):
     """Returns the solution of a linear polynomial equation.
 
@@ -106,12 +111,47 @@ def solve_1rst_degree_poly(expr):
     # `sympy.Eq` returns True (sympy-type True)
     # when the the generated expression is 2x-2x=0 or 0x=0,
     # and False when 0x=4.
-    if eq is sympify(True):
+    if eq is sympy.sympify(True):
         return ANY_NUMBER
-    elif eq is sympify(False):
+    elif eq is sympy.sympify(False):
         return NO_SOLUTION
     else:
         return sympy.solve(eq, x)[0]
+
+
+# --------------------------------------------------------------------------------------------------------
+# Escaped `re` special chars.
+_re_compatible_op_symbols = ('\+', '-', '/', '\*')
+
+
+def consecutive_operators_search(expr):
+    patterns = itertools.product(_re_compatible_op_symbols, repeat=2)
+    for t in patterns:
+        pat = '{}{}'.format(*t)
+        found = re.search(pat, expr)
+        if found:
+            return found
+
+
+# ---------------------------------------------------------------------------------
+class SpecialAnswerType(object):
+    pass
+
+
+class AnyNumber(SpecialAnswerType):
+    button_text = 'Any number.'
+ANY_NUMBER = AnyNumber()
+
+
+class NoSolution(SpecialAnswerType):
+    button_text = 'No solution.'
+NO_SOLUTION = NoSolution()
+
+
+SPECIAL_ANSWERS_TYPES = tuple(class_children(SpecialAnswerType))
+
+
+SYMPY_ANSWERS_TYPES = tuple(i for i in dir(sympy.Q) if not i.startswith('_'))
 
 
 if __name__ == '__main__':
