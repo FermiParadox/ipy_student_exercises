@@ -126,11 +126,11 @@ class TestEachPattern(TestCase):
                              pattern=answer_patterns.integer.with_sign)
 
     def test_not_fullmatch_integer(self):
-        self._does_not_fullmatch(lst_of_strs=['93.2', '2.0', '.4', '-1/3', '-2x', '4*2'],
+        self._does_not_fullmatch(lst_of_strs=['93.2', '2.0', '.4', '-1/3', '-2x5', '4*2'],
                                  pattern=answer_patterns.integer)
 
     def test_find2patterns_integer(self):
-        lst = ['1*z+2+1.4', '144+0.1/1000-2.4']
+        lst = ['1*z3+2+1.4', '135+0.1/7000-2.84']
         self._does_find2patterns(bounds_strs_lst=lst,
                                  pattern=answer_patterns.integer)
 
@@ -145,11 +145,11 @@ class TestEachPattern(TestCase):
                              pattern=answer_patterns.decimal.with_sign)
 
     def test_not_fullmatch_decimal(self):
-        self._does_not_fullmatch(lst_of_strs=['1', '1422', '0', '.4', '4.', '4.2*x', '4.2-3.1', '0x'],
+        self._does_not_fullmatch(lst_of_strs=['1', '1422', '0', '.4', '4.', '4.2*x6', '4.2-3.1', '0x'],
                                  pattern=answer_patterns.decimal.with_sign)
 
     def test_find2patterns_decimal(self):
-        lst = ['-1.4+1145.552', '(4.5*x/2)**0.001']
+        lst = ['-1.4+1145.552', '(4.5*x5/2)**0.001']
         self._does_find2patterns(bounds_strs_lst=lst,
                                  pattern=answer_patterns.decimal)
 
@@ -164,7 +164,7 @@ class TestEachPattern(TestCase):
                              pattern=answer_patterns.fraction_of_ints.with_sign)
 
     def test_not_fullmatch_fraction_of_ints(self):
-        self._does_not_fullmatch(lst_of_strs=['2/3.0', '-x/2', '1.2'],
+        self._does_not_fullmatch(lst_of_strs=['2/3.0', '-x4/2', '1.2'],
                                  pattern=answer_patterns.fraction_of_ints.with_sign)
 
     def test_find2patterns_fraction_of_ints(self):
