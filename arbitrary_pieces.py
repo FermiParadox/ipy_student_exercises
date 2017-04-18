@@ -112,9 +112,9 @@ def solve_1rst_degree_poly(expr):
     # when the the generated expression is 2x-2x=0 or 0x=0,
     # and False when 0x=4.
     if eq is sympy.sympify(True):
-        return ANY_NUMBER
+        return AnyNumber
     elif eq is sympy.sympify(False):
-        return NO_SOLUTION
+        return NoSolution
     else:
         return sympy.solve(eq, x)[0]
 
@@ -140,12 +140,10 @@ class SpecialAnswerType(object):
 
 class AnyNumber(SpecialAnswerType):
     button_text = 'Any number.'
-ANY_NUMBER = AnyNumber()
 
 
 class NoSolution(SpecialAnswerType):
     button_text = 'No solution.'
-NO_SOLUTION = NoSolution()
 
 
 SPECIAL_ANSWERS_TYPES = tuple(class_children(SpecialAnswerType))

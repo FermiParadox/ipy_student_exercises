@@ -2,6 +2,7 @@ import abc
 import random
 import sympy
 import mpmath
+import re
 
 from sympy import sympify
 from IPython.display import display
@@ -9,8 +10,9 @@ from IPython.display import display
 
 import languages
 import arbitrary_pieces
+import answer_patterns
 from never_importer import UnexpectedValueError
-from arbitrary_pieces import r_int, solve_1rst_degree_poly, AnyNumber, NoSolution, SPECIAL_ANSWERS_TYPES
+from arbitrary_pieces import r_int, solve_1rst_degree_poly
 from qa_display_widgets import QADisplayBox, FillGapsBox
 
 
@@ -22,8 +24,6 @@ class Exercise(metaclass=abc.ABCMeta):
         self.question_title = self._question_title()
         self.question = self._question()
         self.question_in_latex = self._question_in_latex()
-        self.answer = self._answer()
-        self.answer_types = self._answer_types()
 
     @abc.abstractmethod
     def _question_title(self):
@@ -37,12 +37,12 @@ class Exercise(metaclass=abc.ABCMeta):
     def _question_in_latex(self):
         pass
 
-    @abc.abstractmethod
-    def _answer(self):
+    @abc.abstractproperty
+    def answer(self):
         pass
 
-    @abc.abstractmethod
-    def _answer_types(self):
+    @abc.abstractproperty
+    def special_answers_allowed(self):
         pass
 
     @abc.abstractproperty
@@ -54,22 +54,33 @@ class Exercise(metaclass=abc.ABCMeta):
         display(displ_class(self).box())
 
     @staticmethod
-    def _is_special_or_sympifiable_answer(answer, allowed_answer_types):
-        """Checks if answer is either special-type or sympifiable."""
-        types_tuple = tuple(allowed_answer_types)
+    def _is_allowed_special_or_sympifiable_answer(answer, allowed_answer_types):
+        """Checks if answer is either within allowed special-types or sympifiable."""
         # Covers special answer types like "AnyNumber"
-        if isinstance(answer, SPECIAL_ANSWERS_TYPES):
-            return isinstance(answer, types_tuple)
+        if answer in arbitrary_pieces.SPECIAL_ANSWERS_TYPES:
+            return answer in allowed_answer_types
         # Consecutive ops are not allowed
+        # (sympify doesn't mind them, so much check here)
         elif arbitrary_pieces.consecutive_operators_search(expr=str(answer)):
             return False
-        # Otherwise, it must be sympified before checked.
         else:
             try:
-                sympified_a = sympify(answer, evaluate=False)
-                return isinstance(sympified_a, types_tuple)
+                sympify(answer, evaluate=False)
+                return True
             except sympy.SympifyError:
                 return False
+
+    @abc.abstractmethod
+    def _is_valid_answer(self, answer):
+        """
+        Checks if answer meets specified restrictions.
+
+        Without restrictions, a user would be able to insert the question itself
+        and sympify wouldn't be able to distinguish it from genuine attempts.
+        Therefor, the dev must add restrictions (using answer-patterns)
+        to prevent it from happening.
+        """
+        pass
 
     @staticmethod
     def _is_correct_answer(answer, expected_answer):
@@ -78,29 +89,38 @@ class Exercise(metaclass=abc.ABCMeta):
 
         WARNING: Assumes answer is "valid" as defined above.
         """
-        if answer == expected_answer:
-            return True
+        if answer in arbitrary_pieces.SPECIAL_ANSWERS_TYPES:
+            return answer == expected_answer
+
         else:
             try:
-                if mpmath.almosteq(sympify(answer), sympify(expected_answer), rel_eps=0.001):
-                    return True
+                sympified_given_a = sympify(answer)
+                sympified_expected_a = sympify(expected_answer)
+                # (special expected answers can't be sympified, but if given_answer is '4'
+                # and expecting a special answer, it should return False anyway.)
             except sympy.SympifyError:
                 return False
 
+            try:
+                if mpmath.almosteq(sympified_given_a, sympified_expected_a, rel_eps=0.001):
+                    return True
+            except TypeError:
+                return sympified_given_a == sympified_expected_a
+
         return False
 
-    @staticmethod
-    def is_correct_and_valid_answer(answer, expected_answer, allowed_answer_types):
-        if Exercise._is_special_or_sympifiable_answer(answer=answer, allowed_answer_types=allowed_answer_types):
-            if Exercise._is_correct_answer(answer=answer, expected_answer=expected_answer):
-                return True
+    def is_valid_and_correct_answer(self, answer, expected_answer):
+        if self._is_allowed_special_or_sympifiable_answer(answer=answer, allowed_answer_types=self.special_answers_allowed):
+            if self._is_valid_answer(answer=answer):
+                if self._is_correct_answer(answer=answer, expected_answer=expected_answer):
+                    return True
         return False
 
 
 class SolveForXLinear(Exercise):
     """
     Example:
-    3x + 2 = 0
+    3*x + 2 = 0
 
     Fractional or decimal solutions should be kept for harder difficulty.
     """
@@ -186,7 +206,8 @@ class SolveForXLinear(Exercise):
         final_string = final_string.replace('+-', '-')
         return final_string.replace('x', self.var_name)
 
-    def _answer(self):
+    @property
+    def answer(self):
         left_str, right_str = self.question.replace(' ', '').split('=')
         left_sympified = sympify(left_str)
         right_sympified = sympify(right_str)
@@ -194,11 +215,24 @@ class SolveForXLinear(Exercise):
         ans = solve_1rst_degree_poly(expr)
         return {self.VARIABLE_NAME: ans}
 
+    def _is_valid_answer(self, answer):
+        if answer in self.special_answers_allowed:
+            return True
+
+        patterns_allowed = [answer_patterns.DECIMAL.with_sign,
+                            answer_patterns.INTEGER.with_sign,
+                            answer_patterns.FRACTION_OF_INTS.with_sign]
+        for patt in patterns_allowed:
+            if re.fullmatch(patt, answer):
+                return True
+
     def _question_in_latex(self):
         return '${}$'.format(self.question.replace('*', ''))
 
-    def _answer_types(self):
-        return {sympy.Number, sympy.Mul, AnyNumber, NoSolution}
+    @property
+    def special_answers_allowed(self):
+        return {arbitrary_pieces.AnyNumber,
+                arbitrary_pieces.NoSolution}
 
 
 if __name__ == '__main__':
@@ -209,7 +243,7 @@ if __name__ == '__main__':
         _inst = SolveForXLinear(difficulty=2)
         _ques = _inst.question
         _ans = _inst.answer
-        if isinstance(_ans, AnyNumber):
+        if isinstance(_ans['x'], arbitrary_pieces.AnyNumber):
             print(_ques)
             print(_ans)
             break

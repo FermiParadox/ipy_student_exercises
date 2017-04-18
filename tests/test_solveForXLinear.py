@@ -2,6 +2,7 @@ import re
 from unittest import TestCase
 
 from exercises import SolveForXLinear
+from arbitrary_pieces import AnyNumber, NoSolution
 from tests import REPETITIONS
 
 
@@ -81,14 +82,38 @@ class Test_question(TestCase):
             self.assertIn('x', q)
 
 
-class Test_answer_types(TestCase):
-    def setUp(self):
-        self.answers = set()
-        for _ in range(REPETITIONS//100):
-            for d in SolveForXLinear.ALLOWED_DIFFICULTIES:
-                inst = SolveForXLinear(difficulty=d)
-                self.answers.add(inst.answer['x'])
+class Test_is_valid_and_correct_answer(TestCase):
 
-    def test_answer_type_within_allowed(self):
-        for a in self.answers:
-            self.assertIsInstance(a, tuple(SolveForXLinear().answer_types))
+    def _test_answer_correctness_base(self, dct, true_or_false_assertion):
+        if true_or_false_assertion is True:
+            assert_f = self.assertTrue
+        elif true_or_false_assertion is False:
+            assert_f = self.assertFalse
+        else:
+            raise TypeError
+
+        inst = SolveForXLinear()
+        for q, answers_lst in dct.items():
+            inst.question = q
+            for a in answers_lst:
+                expected_a = inst.answer['x']
+                assert_f(inst.is_valid_and_correct_answer(answer=a, expected_answer=expected_a),
+                         msg='\nGiven answer: {}\nExpected: {}'.format(a, expected_a))
+
+    def test_correct_answer(self):
+        dct = {
+            '2*x-1=0': ['1/2', '+1/2', '(+1)/2', '0.5', '0.50000000000000000000000001'],
+            '0*x-0=0': [AnyNumber],
+            '0*x-1=0': [NoSolution],
+        }
+        return self._test_answer_correctness_base(dct=dct, true_or_false_assertion=True)
+
+    def test_incorrect_answer(self):
+        dct = {
+            '2*x-1=0': ['-1/2', '1.0/2', '(1)/2', '-0.5', '0.51'],
+            '0*x-0=0': ['6', '-', '=+-', NoSolution],
+            '0*x-1=0': ['6', '-', '=+-', AnyNumber],
+        }
+        return self._test_answer_correctness_base(dct=dct, true_or_false_assertion=False)
+
+

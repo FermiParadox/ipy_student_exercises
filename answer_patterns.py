@@ -15,7 +15,9 @@ import operator
 from arbitrary_pieces import UnexpectedValueError, print_delimiter
 
 
-PLUS_OR_MINUS_PATT = r'(?:\+|-)?'
+PLUS_OR_MINUS_PATT = r'(?:\+|-)'
+MAYBE_PLUS_OR_MINUS_PATT = PLUS_OR_MINUS_PATT + '?'
+
 
 PATTERNS = []
 
@@ -41,7 +43,7 @@ class _PatternBase(str):
             raise UnexpectedValueError('`compile_obj` must be a `re.compile` object.')
         if ('_' in patt) or (' ' in patt):
             raise UnexpectedValueError('Pattern must not include whitespaces or "_".')
-        inst.__dict__.update({'with_sign': PLUS_OR_MINUS_PATT + inst})
+        inst.__dict__.update({'with_sign': MAYBE_PLUS_OR_MINUS_PATT + inst})
         _PatternBase._check_duplicates_and_note_new_pattern(pattern=patt)
         return inst
 
@@ -50,6 +52,7 @@ class _PatternBase(str):
         """
         Checks if total matches found meet the criteria of `bounds_str`.
 
+        :param m: Total bounds found.
         :param bounds_str: Expresses bounds of total matches found (must contain 'm').
             eg. 'm>2', 'm!=3', '2<=m<3'
         :return: (bool)
@@ -96,10 +99,10 @@ find_m_patterns = _PatternBase.findall
 
 # (Using `re.compile` for visibility provided by IDE)
 # Patterns must account for the fact that variables might be named 'x1'.
-integer = _PatternBase(re.compile(r'(?<![a-zA-Z0-9.])\d+(?!\.)'))
-decimal = _PatternBase(re.compile(r'(?<![a-zA-Z0-9.])\d+\.\d+'))
-fraction_of_ints = _PatternBase(
-    re.compile(r'(?:{i}/{i})|(?:\({s}{i}\)/{i})|(?:{i}/\({s}{i}\))|(?:\({s}{i}\)/\({s}{i}\))'.format(i=integer,
+INTEGER = _PatternBase(re.compile(r'(?<![a-zA-Z0-9.])\d+(?!\.)'))
+DECIMAL = _PatternBase(re.compile(r'(?<![a-zA-Z0-9.])\d+\.\d+'))
+FRACTION_OF_INTS = _PatternBase(
+    re.compile(r'(?:{i}/{i})|(?:\({s}{i}\)/{i})|(?:{i}/\({s}{i}\))|(?:\({s}{i}\)/\({s}{i}\))'.format(i=INTEGER,
                                                                                                      s=PLUS_OR_MINUS_PATT)))
 
 
@@ -111,8 +114,8 @@ if __name__ == '__main__':
         print('{}'.format(p))
 
     print_delimiter()
-    print(integer)
-    print(re.fullmatch(integer, '2'))
-    print(re.fullmatch(integer, '+2'))
-    print(re.fullmatch(integer.with_sign, '+2'))
+    print(INTEGER)
+    print(re.fullmatch(INTEGER, '2'))
+    print(re.fullmatch(INTEGER, '+2'))
+    print(re.fullmatch(INTEGER.with_sign, '+2'))
 
