@@ -126,7 +126,7 @@ class TestEachPattern(TestCase):
                              pattern=answer_patterns.INTEGER.with_sign)
 
     def test_not_fullmatch_INTEGER(self):
-        self._does_not_fullmatch(lst_of_strs=['(1)', '93.2', '2.0', '.4', '-1/3', '-2x5', '4*2'],
+        self._does_not_fullmatch(lst_of_strs=['(1)', '-+1', '93.2', '2.0', '.4', '-1/3', '-2x5', '4*2'],
                                  pattern=answer_patterns.INTEGER.with_sign)
 
     def test_find2patterns_INTEGER(self):

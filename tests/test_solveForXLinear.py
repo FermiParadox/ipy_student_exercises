@@ -96,11 +96,11 @@ class Test_is_valid_and_correct_answer(TestCase):
         for q, answers_lst in dct.items():
             inst.question = q
             for a in answers_lst:
-                expected_a = inst.answer['x']
+                expected_a = inst.answers['x']
                 assert_f(inst.is_valid_and_correct_answer(answer=a, expected_answer=expected_a),
                          msg='\nGiven answer: {}\nExpected: {}'.format(a, expected_a))
 
-    def test_correct_answer(self):
+    def test_correct_answers(self):
         dct = {
             '2*x-1=0': ['1/2', '+1/2', '(+1)/2', '0.5', '0.50000000000000000000000001'],
             '0*x-0=0': [AnyNumber],
@@ -108,7 +108,7 @@ class Test_is_valid_and_correct_answer(TestCase):
         }
         return self._test_answer_correctness_base(dct=dct, true_or_false_assertion=True)
 
-    def test_incorrect_answer(self):
+    def test_incorrect_answers(self):
         dct = {
             '2*x-1=0': ['-1/2', '1.0/2', '(1)/2', '-0.5', '0.51'],
             '0*x-0=0': ['6', '-', '=+-', NoSolution],

@@ -41,7 +41,7 @@ _ALLOWED_POS_NEG_0 = set('+-0')
 _MANDATORY_POS_NEG_0 = _ALLOWED_POS_NEG_0 - {'0'}
 
 
-def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
+def r_int(bounds, pos_neg_0='+-0', excluded=(), weights=None) -> int:
     """
     Return random integer within bounds, excluding a list of ints.
 
@@ -62,6 +62,7 @@ def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
     :param pos_neg_0: String containing any of the following '+-' and optionally '0',
         corresponding to positive, negative and 0.
     :param excluded: Numbers to be excluded.
+    :param weights: Weights of individual numbers (each number has `weight = 1` by default)
     """
     if isinstance(bounds, int):
         b1, b2 = -bounds, bounds
@@ -82,11 +83,20 @@ def r_int(bounds, pos_neg_0='+-0', excluded=()) -> int:
         nums = {i for i in nums if not i < 0}
     if '+' not in pos_neg_0:
         nums = {i for i in nums if not i > 0}
+    nums_lst = list(nums)
 
-    # Easier to understand error compared to `choice`'s error.
-    if not nums:
+    if weights:
+        for n, w in weights.items():
+            if n not in nums_lst:
+                raise ValueError("Can't provide weight for number that is out of the bounds ({}).".format(n))
+            if (w <= 0) or (not isinstance(w, int)):
+                raise ValueError('Weight must be positive int.')
+            nums_lst.extend(itertools.repeat(n, w-1))
+
+    # (Easier to understand error compared to `choice`'s error.)
+    if not nums_lst:
         raise ValueError('No number exists for given args.')
-    return random.choice(list(nums))
+    return random.choice(nums_lst)
 
 
 # ---------------------------------------------------------------------------------

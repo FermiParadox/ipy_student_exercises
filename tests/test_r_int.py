@@ -1,5 +1,5 @@
-import random
 from unittest import TestCase
+from random import randint
 
 from tests import REPETITIONS
 from arbitrary_pieces import r_int, _ALLOWED_POS_NEG_0, UnexpectedValueError
@@ -17,12 +17,12 @@ class Test_r_int(TestCase):
 
     def test_within_upper_bound(self):
         for _ in range(REPETITIONS):
-            bound = random.randint(0, 100)
+            bound = randint(0, 100)
             self.assertLessEqual(r_int(bound), bound)
 
     def test_within_lower_bound(self):
         for _ in range(REPETITIONS):
-            bound = random.randint(0, 100)
+            bound = randint(0, 100)
             self.assertGreaterEqual(r_int(bound),  -bound)
 
     def test_only_negatives(self):
@@ -79,7 +79,25 @@ class Test_r_int(TestCase):
     def test_excluded(self):
         for _ in range(REPETITIONS):
             bound = 3
-            excluded_n = random.randint(-bound, bound)
+            excluded_n = randint(-bound, bound)
             self.assertNotEqual(excluded_n, r_int(bound, excluded={excluded_n}))
 
+    def test_weight_for_disallowed_number(self):
+        for _ in range(REPETITIONS):
+            self.assertRaises(ValueError, r_int, (-5, +3), '+', (), {-1: 2})
 
+    def test_weight_effect_on_odds(self):
+        nums_lst = []
+        weight_1 = 3
+        for _ in range(REPETITIONS):
+            nums_lst.append(r_int((0, 2), weights={1: weight_1}))
+        ratio_1 = nums_lst.count(1) / len(nums_lst)
+        weight_ratio_1 = weight_1 / (1+weight_1+1)
+        self.assertAlmostEqual(weight_ratio_1, ratio_1, delta=.01)
+
+    def test_weight_of_negative_or_0_doesnt_raise(self):
+        self.assertIsNotNone(r_int((-1, 2), weights={-1: 4, 0: 4}))
+
+    def test_non_positive_weight(self):
+        self.assertRaises(ValueError, r_int, 5, weights={1: 0})
+        self.assertRaises(ValueError, r_int, 5, weights={1: -4})

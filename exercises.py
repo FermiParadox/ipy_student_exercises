@@ -38,7 +38,7 @@ class Exercise(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractproperty
-    def answer(self):
+    def answers(self):
         pass
 
     @abc.abstractproperty
@@ -79,16 +79,13 @@ class Exercise(metaclass=abc.ABCMeta):
         and sympify wouldn't be able to distinguish it from genuine attempts.
         Therefor, the dev must add restrictions (using answer-patterns)
         to prevent it from happening.
+
+        :return: (bool)
         """
         pass
 
     @staticmethod
     def _is_correct_answer(answer, expected_answer):
-        """
-        Checks if answer is correct.
-
-        WARNING: Assumes answer is "valid" as defined above.
-        """
         if answer in arbitrary_pieces.SPECIAL_ANSWERS_TYPES:
             return answer == expected_answer
 
@@ -110,7 +107,8 @@ class Exercise(metaclass=abc.ABCMeta):
         return False
 
     def is_valid_and_correct_answer(self, answer, expected_answer):
-        if self._is_allowed_special_or_sympifiable_answer(answer=answer, allowed_answer_types=self.special_answers_allowed):
+        if self._is_allowed_special_or_sympifiable_answer(answer=answer,
+                                                          allowed_answer_types=self.special_answers_allowed):
             if self._is_valid_answer(answer=answer):
                 if self._is_correct_answer(answer=answer, expected_answer=expected_answer):
                     return True
@@ -207,7 +205,7 @@ class SolveForXLinear(Exercise):
         return final_string.replace('x', self.var_name)
 
     @property
-    def answer(self):
+    def answers(self):
         left_str, right_str = self.question.replace(' ', '').split('=')
         left_sympified = sympify(left_str)
         right_sympified = sympify(right_str)
@@ -225,6 +223,7 @@ class SolveForXLinear(Exercise):
         for patt in patterns_allowed:
             if re.fullmatch(patt, answer):
                 return True
+        return False
 
     def _question_in_latex(self):
         return '${}$'.format(self.question.replace('*', ''))
@@ -238,11 +237,11 @@ class SolveForXLinear(Exercise):
 if __name__ == '__main__':
     _inst = SolveForXLinear(difficulty=3)
     print(_inst.question)
-    print(_inst.answer)
+    print(_inst.answers)
     while 1:
         _inst = SolveForXLinear(difficulty=2)
         _ques = _inst.question
-        _ans = _inst.answer
+        _ans = _inst.answers
         if isinstance(_ans['x'], arbitrary_pieces.AnyNumber):
             print(_ques)
             print(_ans)
