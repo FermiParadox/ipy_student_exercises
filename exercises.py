@@ -39,10 +39,34 @@ class Exercise(metaclass=abc.ABCMeta):
 
     @abc.abstractproperty
     def answers(self):
+        """
+        Return all variable names along with their expected values.
+        The reason this is a dict is because some exercises
+        will have multiple solutions, eg. polynomials.
+
+        When there is "no solution" (eg. `x**2 = 1` in Real domain),
+        _all_ answers should have the equivalent NoSolution object assigned.
+        Same goes for "any number", etc.
+
+        :return: (dict)
+        """
         pass
 
     @abc.abstractproperty
     def special_answers_allowed(self):
+        """
+        Used for answer-objects that represent "no solution", "any number is a solution" etc.
+        """
+        pass
+
+    @abc.abstractproperty
+    def interchangeable_answers(self):
+        """
+        If x1, x2, x3 can be provided as an answer in non-specific order
+        (for example the roots of a polynomial),
+        then they are interchangeable and this method should
+        `return {[x1, x2, x3], ..}`.
+        """
         pass
 
     @abc.abstractproperty
@@ -106,13 +130,44 @@ class Exercise(metaclass=abc.ABCMeta):
 
         return False
 
-    def is_valid_and_correct_answer(self, answer, expected_answer):
+    def _is_valid_and_correct_answer(self, answer, expected_answer):
         if self._is_allowed_special_or_sympifiable_answer(answer=answer,
                                                           allowed_answer_types=self.special_answers_allowed):
             if self._is_valid_answer(answer=answer):
                 if self._is_correct_answer(answer=answer, expected_answer=expected_answer):
                     return True
         return False
+
+    # TODO test
+    def _is_interchangeable_and_correct_answer(self, answer, expected_answers, used_interchangeable_a_names):
+        for group in self.interchangeable_answers:
+            if answer not in group:
+                continue
+            for interch_a_name in group:
+                if interch_a_name in used_interchangeable_a_names:
+                    continue
+                else:
+                    if self._is_valid_and_correct_answer(answer=answer,
+                                                         expected_answer=expected_answers[interch_a_name]):
+                        used_interchangeable_a_names.append(interch_a_name)
+                        return True
+
+    # TODO test individually for each Exercise
+    def check_all_answers(self, answers, expected_answers):
+        used_interchangeable_a_names = []
+        for given_answer_name, value in answers.items():
+            if self._is_valid_and_correct_answer(answer=value,
+                                                 expected_answer=expected_answers[given_answer_name]):
+                continue
+            # If answer name didn't match the expected val, then it might be interchangeable.
+            if self._is_interchangeable_and_correct_answer(answer=given_answer_name,
+                                                           expected_answers=expected_answers,
+                                                           used_interchangeable_a_names=used_interchangeable_a_names):
+                continue
+            return False
+        # If loop wasn't prematurely interrupted then all answers were correct.
+        else:
+            return True
 
 
 class SolveForXLinear(Exercise):
@@ -232,6 +287,10 @@ class SolveForXLinear(Exercise):
     def special_answers_allowed(self):
         return {arbitrary_pieces.AnyNumber,
                 arbitrary_pieces.NoSolution}
+
+    @property
+    def interchangeable_answers(self):
+        return {}
 
 
 if __name__ == '__main__':

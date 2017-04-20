@@ -2,7 +2,8 @@
 Contains patterns used in order to determine if answer has expected form,
 or detect answer contents (eg. ints, decimals, etc).
 
-Sympy's `Assumptions` or `type(sympify())` not used since they sometimes produce counter-intuitive results,
+Sympy's `Assumptions` or `type(sympify())` are not used
+since they sometimes produce counter-intuitive results,
 eg. `type(sympify('1/3'))` is `Pow`
     `sympify('1+2').is_integer` is `True`
 """

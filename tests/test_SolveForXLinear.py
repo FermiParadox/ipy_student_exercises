@@ -82,7 +82,7 @@ class Test_question(TestCase):
             self.assertIn('x', q)
 
 
-class Test_is_valid_and_correct_answer(TestCase):
+class Test_check_all_answers(TestCase):
 
     def _test_answer_correctness_base(self, dct, true_or_false_assertion):
         if true_or_false_assertion is True:
@@ -97,7 +97,7 @@ class Test_is_valid_and_correct_answer(TestCase):
             inst.question = q
             for a in answers_lst:
                 expected_a = inst.answers['x']
-                assert_f(inst.is_valid_and_correct_answer(answer=a, expected_answer=expected_a),
+                assert_f(inst.check_all_answers(answers={'x': a}, expected_answers={'x': expected_a}),
                          msg='\nGiven answer: {}\nExpected: {}'.format(a, expected_a))
 
     def test_correct_answers(self):

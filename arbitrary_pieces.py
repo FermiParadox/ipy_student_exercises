@@ -56,6 +56,8 @@ def r_int(bounds, pos_neg_0='+-0', excluded=(), weights=None) -> int:
     >>> r_int(7, '+0')
     # A negative int within [-5 to 3] excluding -4 and -1
     >>> r_int((-5, 3), '-', {-4, -1})
+    # Any int within [-1,4] with 3 having double the odds of appearing than the other ints
+    >>> r_int((-1, 4), weights={3: 2})
 
     :param bounds: Either a single int (the upper bound)
         or a tuple of ints (lower, upper bounds).
