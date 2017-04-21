@@ -138,7 +138,6 @@ class Exercise(metaclass=abc.ABCMeta):
                     return True
         return False
 
-    # TODO test
     def _is_interchangeable_and_correct_answer(self, answer, expected_answers, used_interchangeable_a_names):
         for group in self.interchangeable_answers:
             if answer not in group:
