@@ -2,9 +2,9 @@ import re
 from unittest import TestCase
 
 from exercises import SolveForXLinear
+from answer_patterns import find_m_patterns
 from arbitrary_pieces import AnyNumber, NoSolution
 from tests import REPETITIONS
-
 
 
 class Test__x_terms_strings(TestCase):
@@ -83,6 +83,19 @@ class Test_question(TestCase):
 
 
 class Test_check_all_answers(TestCase):
+
+    def test_special_answers_occurs_often_enough_in_d2(self):
+        reps = REPETITIONS//10
+        detected = 0
+        for _ in range(reps):
+            # only diff==2 focuses on teaching special answers
+            inst = SolveForXLinear(difficulty=2)
+            # Don't detect `=0` or `40`
+            # Assumes question is always \d*x+\d=\d
+            if find_m_patterns(r'(?<![=\d])0', inst.question.replace(' ', ''), 'm==2'):
+                detected += 1
+        self.assertGreater(detected/reps, .05)
+        self.assertLess(detected/reps, .2)
 
     def _test_answer_correctness_base(self, dct, true_or_false_assertion):
         if true_or_false_assertion is True:

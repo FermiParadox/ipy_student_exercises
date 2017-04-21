@@ -242,8 +242,8 @@ class SolveForXLinear(Exercise):
             right_side = '0'
         elif d == 2:
             # Real solution/no solution/infinite solutions
-            a = r_int(10, '-+0')
-            b = r_int(10, '-+0')
+            a = r_int(10, '-+0', weights={0: 10})
+            b = r_int(10, '-+0', weights={0: 8})
             left_side = '{a}*x + {b}'.format(a=a, b=b)
             right_side = '0'
         else:
