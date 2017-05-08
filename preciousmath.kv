@@ -1,0 +1,79 @@
+#:kivy 1.9.2
+
+#:import main main
+
+
+<Label>:
+    markup: True
+    color: 0,0,0,1
+
+<Button>:
+    background_normal: 'own_images/simple_grey_button.png'
+    background_down: 'own_images/simple_grey_button_pressed.png'
+    background_disabled_normal: self.background_down
+
+<GridLayout>:
+    grid_background: main.BACKGROUND_COLOR
+
+    canvas.before:
+        Color:
+            rgba: main.BACKGROUND_COLOR or self.grid_background     # Property is None at initialising raising error
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+# Class code below (including the corresponding in main.py)
+# by Alexander Taylor
+# from https://github.com/kivy/kivy/wiki/Scrollable-Label
+<ScrollLabel>:
+    text: ''
+    color: 0,0,0,1
+    ConfinedTextLabel:
+        text: root.text
+        color: root.color
+
+# -------------------------------------------------------------------------------
+<MainWidget>:
+    canvas.before:
+        Color:
+            rgba: main.BACKGROUND_COLOR
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+    FloatLayout:
+        Label:
+            id: version_label
+            pos_hint: {'center_x': .8, 'center_y': .07}
+            size_hint: .9, .2
+            text: '{} {}'.format('version', main.__version__)
+            font_size: '12sp'
+        Label:
+            pos_hint: {'center_x': .5, 'center_y': .8}
+            size_hint: .9, .1
+            text: main.APP_NAME
+            font_size: '30sp'
+        BoxLayout:
+            pos_hint: {'center_x': .5, 'center_y': .5}
+            size_hint: .5, .35
+            orientation: 'vertical'
+
+            Button:
+                text: 'Play'
+                bold: True
+                border: [0]*4
+                on_release: root.load_slide(play_page)
+            Button:
+                text: 'Treasures'
+                border: [0]*4
+                bold: True
+                on_release: root.load_slide(treasures_page)
+            Button:
+                text: 'About'
+                border: [0]*4
+                on_release: root.load_slide(about_page)
+            Button:
+                text: 'Attributions'
+                border: [0]*4
+                on_release: root.load_slide(attributions_page)
