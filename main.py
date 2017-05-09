@@ -4,6 +4,11 @@ if 1:
     Config.set('graphics', 'width', '410')
     Config.set('graphics', 'height', '700')
 
+
+import matplotlib
+matplotlib.use("module://kivy.garden.matplotlib.backend_kivy")
+from matplotlib import pyplot
+from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.animation import Animation
@@ -15,6 +20,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
+from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
@@ -25,6 +31,7 @@ from kivy import platform
 
 
 import attributions
+import exercises
 
 
 __version__ = '0.0.1'
@@ -76,13 +83,13 @@ class MyProgressBar(Widget):
     empty_ratio = NumericProperty(.01)
 
 
+# Class code below (including the corresponding in .kv file)
+# by Alexander Taylor
+# from https://github.com/kivy/kivy/wiki/Scrollable-Label
 class ConfinedTextLabel(Label):
     pass
 
 
-# Class code below (including the corresponding in .kv file)
-# by Alexander Taylor
-# from https://github.com/kivy/kivy/wiki/Scrollable-Label
 class ScrollLabel(ScrollView):
     pass
 
@@ -128,7 +135,33 @@ class PaintedLabel(Label):
 
 
 # -----------------------------------------------------------------------------------------------
+class LatexWidget(ScatterLayout):
+    text = StringProperty('')
+
+    def __init__(self, **kwargs):
+        super(LatexWidget, self).__init__(do_rotation=False, do_translation=False, **kwargs)
+
+    @staticmethod
+    def latex_image(latex_str):
+        fig, ax = pyplot.subplots()
+        ax.axis('off')
+        ax.text(0.5, 0.5, latex_str,
+                size=15,
+                horizontalalignment='center', verticalalignment='center',
+                bbox={})
+        return FigureCanvasKivyAgg(fig)
+
+    def on_text(self, *args):
+        if self.children:
+            self.remove_widget(self.children[0])
+        im = LatexWidget.latex_image(self.text)
+        self.add_widget(im)
+
+
 class MainWidget(Carousel):
+    _INITIAL_EXERCISE = exercises.SolveForXLinear()
+    exercise = ObjectProperty(_INITIAL_EXERCISE)
+
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
 

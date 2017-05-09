@@ -1,6 +1,7 @@
 #:kivy 1.9.2
 
 #:import main main
+#:import about_module about_module
 
 
 <Label>:
@@ -25,12 +26,20 @@
 # Class code below (including the corresponding in main.py)
 # by Alexander Taylor
 # from https://github.com/kivy/kivy/wiki/Scrollable-Label
+<ConfinedTextLabel>:
+    color: 0,0,0,1
+    text_size: self.width * .8, None
+    size_hint_y: None
+    height: self.texture_size[1]
+
 <ScrollLabel>:
     text: ''
     color: 0,0,0,1
+    font_size: 15
     ConfinedTextLabel:
         text: root.text
         color: root.color
+        font_size: root.font_size
 
 # -------------------------------------------------------------------------------
 <MainWidget>:
@@ -70,6 +79,10 @@
                 bold: True
                 on_release: root.load_slide(treasures_page)
             Button:
+                text: 'History'
+                border: [0]*4
+                on_release: root.load_slide(history_page)
+            Button:
                 text: 'About'
                 border: [0]*4
                 on_release: root.load_slide(about_page)
@@ -77,3 +90,27 @@
                 text: 'Attributions'
                 border: [0]*4
                 on_release: root.load_slide(attributions_page)
+
+    BoxLayout:
+        id: play_page
+        orientation: 'vertical'
+        ScrollLabel:
+            size_hint_y: .1
+            text: root.exercise.question_title
+            font_size: '15sp'
+        LatexWidget:
+            text: root.exercise.question_in_latex
+            size_hint_y: .1
+        BoxLayout:
+            id: answers_widg
+
+    BoxLayout:
+        id: about_page
+        orientation: 'vertical'
+        Label:
+            size_hint_y: .1
+            text: 'About'
+            font_size: '20sp'
+            bold: True
+        ScrollLabel:
+            text: about_module.ABOUT_TEXT

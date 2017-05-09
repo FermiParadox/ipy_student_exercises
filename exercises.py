@@ -238,13 +238,13 @@ class SolveForXLinear(Exercise):
             # Positive integer solution
             a = r_int(5, '+')
             b = r_int(10, '-') * a
-            left_side = '{a}*x + {b}'.format(a=a, b=b)
+            left_side = '{a}*x+{b}'.format(a=a, b=b)
             right_side = '0'
         elif d == 2:
             # Real solution/no solution/infinite solutions
             a = r_int(10, '-+0', weights={0: 10})
             b = r_int(10, '-+0', weights={0: 8})
-            left_side = '{a}*x + {b}'.format(a=a, b=b)
+            left_side = '{a}*x+{b}'.format(a=a, b=b)
             right_side = '0'
         else:
             # Real solution/no solution/infinite solutions, any number of terms.
@@ -254,7 +254,7 @@ class SolveForXLinear(Exercise):
             # Add '0' if the side is empty.
             left_side = left_side or '0'
             right_side = right_side or '0'
-        final_string = ' = '.join([left_side, right_side])
+        final_string = '='.join([left_side, right_side])
         final_string = final_string.replace('+-', '-')
         return final_string.replace('x', self.var_name)
 
