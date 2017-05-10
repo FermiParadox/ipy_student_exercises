@@ -78,20 +78,23 @@ class Exercise(metaclass=abc.ABCMeta):
         display(displ_class(self).box())
 
     @staticmethod
-    def _is_allowed_special_or_sympifiable_answer(answer, allowed_answer_types):
+    def _is_allowed_special_or_sympifiable_answer(answer_val, allowed_answer_types):
         """Checks if answer is either within allowed special-types or sympifiable."""
         # Covers special answer types like "AnyNumber"
-        if answer in arbitrary_pieces.SPECIAL_ANSWERS_TYPES:
-            return answer in allowed_answer_types
+        if answer_val in arbitrary_pieces.SPECIAL_ANSWERS_TYPES:
+            return answer_val in allowed_answer_types
         # Consecutive ops are not allowed
         # (sympify doesn't mind them, so much check here)
-        elif arbitrary_pieces.consecutive_operators_search(expr=str(answer)):
+        elif arbitrary_pieces.consecutive_operators_search(expr=str(answer_val)):
             return False
         else:
             try:
-                sympify(answer, evaluate=False)
+                sympify(answer_val, evaluate=False)
                 return True
             except sympy.SympifyError:
+                return False
+            # (empty string would raise that)
+            except IndexError:
                 return False
 
     @abc.abstractmethod
@@ -130,36 +133,36 @@ class Exercise(metaclass=abc.ABCMeta):
 
         return False
 
-    def _is_valid_and_correct_answer(self, answer, expected_answer):
-        if self._is_allowed_special_or_sympifiable_answer(answer=answer,
+    def _is_valid_and_correct_answer(self, answer_val, expected_answer):
+        if self._is_allowed_special_or_sympifiable_answer(answer_val=answer_val,
                                                           allowed_answer_types=self.special_answers_allowed):
-            if self._is_valid_answer(answer=answer):
-                if self._is_correct_answer(answer=answer, expected_answer=expected_answer):
+            if self._is_valid_answer(answer=answer_val):
+                if self._is_correct_answer(answer=answer_val, expected_answer=expected_answer):
                     return True
         return False
 
-    def _is_interchangeable_and_correct_answer(self, answer, expected_answers, used_interchangeable_a_names):
+    def _is_interchangeable_and_correct_answer(self, answer_val, expected_answers, used_interchangeable_a_names):
         for group in self.interchangeable_answers:
-            if answer not in group:
+            if answer_val not in group:
                 continue
             for interch_a_name in group:
                 if interch_a_name in used_interchangeable_a_names:
                     continue
                 else:
-                    if self._is_valid_and_correct_answer(answer=answer,
+                    if self._is_valid_and_correct_answer(answer_val=answer_val,
                                                          expected_answer=expected_answers[interch_a_name]):
                         used_interchangeable_a_names.append(interch_a_name)
                         return True
 
     # TODO test individually for each Exercise
-    def check_all_answers(self, answers, expected_answers):
+    def _check_all_answers(self, answers, expected_answers):
         used_interchangeable_a_names = []
-        for given_answer_name, value in answers.items():
-            if self._is_valid_and_correct_answer(answer=value,
+        for given_answer_name, answer_val in answers.items():
+            if self._is_valid_and_correct_answer(answer_val=answer_val,
                                                  expected_answer=expected_answers[given_answer_name]):
                 continue
             # If answer name didn't match the expected val, then it might be interchangeable.
-            if self._is_interchangeable_and_correct_answer(answer=given_answer_name,
+            if self._is_interchangeable_and_correct_answer(answer_val=answer_val,
                                                            expected_answers=expected_answers,
                                                            used_interchangeable_a_names=used_interchangeable_a_names):
                 continue
@@ -167,6 +170,11 @@ class Exercise(metaclass=abc.ABCMeta):
         # If loop wasn't prematurely interrupted then all answers were correct.
         else:
             return True
+
+    # (contains *args since it's used as callback)
+    def check_all_answers(self, answers_given, *args):
+        print(answers_given)
+        self._check_all_answers(answers=answers_given, expected_answers=self.answers)
 
 
 class SolveForXLinear(Exercise):

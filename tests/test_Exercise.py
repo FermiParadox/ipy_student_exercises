@@ -15,28 +15,28 @@ class Test__is_allowed_special_or_sympifiable_answer(TestCase):
 
     def test_sympifiable(self):
         for n in self.SYMPIFIABLE_EXPRESSIONS:
-            self.assertTrue(Exercise._is_allowed_special_or_sympifiable_answer(answer=n, allowed_answer_types=[sympy.Number]),
+            self.assertTrue(Exercise._is_allowed_special_or_sympifiable_answer(answer_val=n, allowed_answer_types=[sympy.Number]),
                             msg='{} type is: {}'.format(n, _sympify_type(expr=n)))
 
     def test_unsympifiable(self):
         for n in self.UNSYMPIFIABLE_EXPRESSIONS:
-            self.assertFalse(Exercise._is_allowed_special_or_sympifiable_answer(answer=n, allowed_answer_types=[NoSolution, AnyNumber]),
+            self.assertFalse(Exercise._is_allowed_special_or_sympifiable_answer(answer_val=n, allowed_answer_types=[NoSolution, AnyNumber]),
                              msg=n)
 
     def test_AnyNumber_valid(self):
-        self.assertTrue(Exercise._is_allowed_special_or_sympifiable_answer(answer=AnyNumber, allowed_answer_types=[AnyNumber]))
+        self.assertTrue(Exercise._is_allowed_special_or_sympifiable_answer(answer_val=AnyNumber, allowed_answer_types=[AnyNumber]))
 
     def test_AnyNumber_invalid(self):
         self.assertFalse(
-            Exercise._is_allowed_special_or_sympifiable_answer(answer=AnyNumber, allowed_answer_types=[NoSolution]))
+            Exercise._is_allowed_special_or_sympifiable_answer(answer_val=AnyNumber, allowed_answer_types=[NoSolution]))
 
     def test_NoSolution_valid(self):
         self.assertTrue(
-            Exercise._is_allowed_special_or_sympifiable_answer(answer=NoSolution, allowed_answer_types=[NoSolution]))
+            Exercise._is_allowed_special_or_sympifiable_answer(answer_val=NoSolution, allowed_answer_types=[NoSolution]))
 
     def test_NoSolution_invalid(self):
         self.assertFalse(
-            Exercise._is_allowed_special_or_sympifiable_answer(answer=NoSolution, allowed_answer_types=[AnyNumber]))
+            Exercise._is_allowed_special_or_sympifiable_answer(answer_val=NoSolution, allowed_answer_types=[AnyNumber]))
 
 
 class Test__is_correct_answer(TestCase):

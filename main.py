@@ -12,6 +12,7 @@ from kivy.garden.matplotlib import FigureCanvasKivyAgg
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.animation import Animation
+from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label as Label
 from kivy.properties import ObjectProperty, DictProperty, NumericProperty, BooleanProperty, ListProperty, StringProperty
 from kivy.storage.jsonstore import JsonStore
@@ -32,6 +33,7 @@ from kivy import platform
 
 import attributions
 import exercises
+import languages
 
 
 __version__ = '0.0.1'
@@ -71,6 +73,10 @@ def paint_text(text_str, color_str):
 
 
 BACKGROUND_COLOR = .9,.9,1,1
+BLACK_RGBA = 0,0,0,1
+GREEN_RGBA = 0,1,0,1
+BLUE_RGBA = 0,0,1,1
+RED_RGBA = 1,0,0,1
 
 
 # -----------------------------------------------------------------------------------------------
@@ -134,7 +140,14 @@ class PaintedLabel(Label):
     pass
 
 
+class VBoxLayout(BoxLayout):
+    def __init__(self, **kwargs):
+        super(VBoxLayout, self).__init__(orientation='vertical', **kwargs)
+
+
 # -----------------------------------------------------------------------------------------------
+_INITIAL_EXERCISE = exercises.SolveForXLinear()
+
 class LatexWidget(ScatterLayout):
     text = StringProperty('')
 
@@ -158,8 +171,55 @@ class LatexWidget(ScatterLayout):
         self.add_widget(im)
 
 
+class AnswersInputBox(BoxLayout):
+    exercise = ObjectProperty(_INITIAL_EXERCISE)
+    answers_given = DictProperty()
+
+    def __init__(self, **kwargs):
+        super(AnswersInputBox, self).__init__(**kwargs)
+        self.textinputs_box = BoxLayout(orientation='vertical', padding='3sp')
+        self.add_widget(self.textinputs_box)
+        self.specials_buttons_box = BoxLayout(orientation='vertical', size_hint_x=.3)
+        self.add_widget(self.specials_buttons_box)
+        self.populate_textinputs_box()
+        self.populate_specials_buttons_box()
+
+    def set_input_text_to_answer(self, *args):
+        obj = args[0]
+        self.answers_given[obj.answer_name_] = obj.text
+
+    def populate_textinputs_box(self, *args):
+        for a_key in self.exercise.answers:
+            label_text = '{}= '.format(a_key)
+            single_text_box = BoxLayout(size_hint_y=None, height='30sp')
+            single_text_box.add_widget(Label(text=label_text, size_hint_x=.2))
+            txt_input = TextInput(hint_text=languages.TYPE_ANSWER_PROMPT_MSG, multiline=False)
+            txt_input.answer_name_ = a_key
+            txt_input.bind(on_text=self.set_input_text_to_answer
+            single_text_box.add_widget(txt_input)
+            self.textinputs_box.add_widget(single_text_box)
+
+    def set_special_answer_to_answers(self, *args):
+        obj = args[0]
+        self.answers_given[8]
+
+    def populate_specials_buttons_box(self, *args):
+        for a_class in self.exercise.special_answers_allowed:
+            b = Button(text=a_class.button_text,
+                       size_hint_y=None, height='30sp',
+                       border=(0,0,0,0))
+            b.bind(on_release=self.set_special_answer_to_answers)
+            self.specials_buttons_box.add_widget(b)
+
+    def populate_everything(self, *args):
+        self.populate_textinputs_box()
+        self.populate_specials_buttons_box()
+
+    def on_exercise(self, *args):
+        self.populate_everything()
+
+
 class MainWidget(Carousel):
-    _INITIAL_EXERCISE = exercises.SolveForXLinear()
     exercise = ObjectProperty(_INITIAL_EXERCISE)
 
     def __init__(self, **kwargs):

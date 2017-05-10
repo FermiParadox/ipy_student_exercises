@@ -82,9 +82,9 @@ class Test_question(TestCase):
             self.assertIn('x', q)
 
 
-class Test_check_all_answers(TestCase):
+class Test__check_all_answers(TestCase):
 
-    def test_special_answers_occurs_often_enough_in_d2(self):
+    def test_special_answers_occur_often_enough_in_d2(self):
         reps = REPETITIONS//10
         detected = 0
         for _ in range(reps):
@@ -110,7 +110,7 @@ class Test_check_all_answers(TestCase):
             inst.question = q
             for a in answers_lst:
                 expected_a = inst.answers['x']
-                assert_f(inst.check_all_answers(answers={'x': a}, expected_answers={'x': expected_a}),
+                assert_f(inst._check_all_answers(answers={'x': a}, expected_answers={'x': expected_a}),
                          msg='\nGiven answer: {}\nExpected: {}'.format(a, expected_a))
 
     def test_correct_answers(self):

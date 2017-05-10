@@ -92,3 +92,15 @@ SOLVE_FOR_X_QUESTION_MSG = Message(
         english: 'Find the value of x.',
         greek: 'Βρες την τιμή του x.',
     })
+
+CHECK_MY_ANSWER_MSG = Message(
+    texts_dct={
+        english: 'Check my answer.',
+        greek: 'Έλεγξε απάντηση.',
+    })
+
+TYPE_ANSWER_PROMPT_MSG = Message(
+    texts_dct={
+        english: '(type the answer)',
+        greek: '(γράψε την απάντηση)',
+    })

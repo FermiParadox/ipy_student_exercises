@@ -1,6 +1,7 @@
 #:kivy 1.9.2
 
 #:import main main
+#:import languages languages
 #:import about_module about_module
 
 
@@ -41,6 +42,7 @@
         color: root.color
         font_size: root.font_size
 
+
 # -------------------------------------------------------------------------------
 <MainWidget>:
     canvas.before:
@@ -71,24 +73,24 @@
             Button:
                 text: 'Play'
                 bold: True
-                border: [0]*4
+                border: 0,0,0,0
                 on_release: root.load_slide(play_page)
             Button:
                 text: 'Treasures'
-                border: [0]*4
+                border: 0,0,0,0
                 bold: True
                 on_release: root.load_slide(treasures_page)
             Button:
                 text: 'History'
-                border: [0]*4
+                border: 0,0,0,0
                 on_release: root.load_slide(history_page)
             Button:
                 text: 'About'
-                border: [0]*4
+                border: 0,0,0,0
                 on_release: root.load_slide(about_page)
             Button:
                 text: 'Attributions'
-                border: [0]*4
+                border: 0,0,0,0
                 on_release: root.load_slide(attributions_page)
 
     BoxLayout:
@@ -101,8 +103,22 @@
         LatexWidget:
             text: root.exercise.question_in_latex
             size_hint_y: .1
-        BoxLayout:
-            id: answers_widg
+        AnswersInputBox:
+            id: answers_input_box
+            size_hint_y: .4
+            padding: '3sp'
+            exercise: root.exercise
+            answers_given: {k: '' for k in root.exercise.answers}
+        Button:
+            text: languages.CHECK_MY_ANSWER_MSG
+            background_color: 0,1,0,1
+            border: 0,0,0,0
+            size_hint_y: None
+            height: '30sp'
+            on_release: if root.exercise.check_all_answers(answers_given=answers_input_box.answers_given): print(6666)
+        Label:
+            size_hint_y: .4
+
 
     BoxLayout:
         id: about_page

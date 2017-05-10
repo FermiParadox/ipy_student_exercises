@@ -1,20 +1,6 @@
 from ipywidgets import Layout, Button, HBox, VBox, Label, Text, Box
 
-import languages
-
-
-TYPE_ANSWER_PROMPT_MSG = languages.Message(
-    texts_dct={
-        languages.english: '(type the answer)',
-        languages.greek: '(γράψε την απάντηση)',
-    })
-
-CHECK_MY_ANSWER_MSG = languages.Message(
-    texts_dct={
-        languages.english: 'Check my answer.',
-        languages.greek: 'Έλεγξε απάντηση.',
-    }
-)
+from languages import CHECK_MY_ANSWER_MSG, TYPE_ANSWER_PROMPT_MSG
 
 
 class QADisplayBox(object):
@@ -26,7 +12,7 @@ class FillGapsBox(QADisplayBox):
 
     def __init__(self, qa_obj):
         self.qa_obj = qa_obj
-        self.expected_answer = self.qa_obj.answers
+        self.expected_answers = self.qa_obj.answers
         self.special_answers_allowed = self.qa_obj.special_answers_allowed
         self.question_title = self.qa_obj.question_title
         self.question_in_latex = self.qa_obj.question_in_latex
@@ -44,10 +30,10 @@ class FillGapsBox(QADisplayBox):
             buttons_lst.append(b)
         return VBox(buttons_lst)
 
-    def _answers_inputs_box(self, answer, special_answers_allowed):
+    def _answers_inputs_box(self, answers, special_answers_allowed):
         # Text-inputs
         texts_widgets_lst = []
-        for a_key in answer:
+        for a_key in answers:
             label_text = '{}= '.format(a_key)
             single_text_box = HBox([
                 Label(label_text, layout=Layout(width='auto')),
@@ -74,7 +60,7 @@ class FillGapsBox(QADisplayBox):
             layout=Layout(border='thin solid grey', width=FillGapsBox.Q_AND_A_WIDTH))
 
     def box(self):
-        textinputs_box = self._answers_inputs_box(answer=self.expected_answer,
+        textinputs_box = self._answers_inputs_box(answers=self.expected_answers,
                                                   special_answers_allowed=self.special_answers_allowed)
         box_layout = Layout(display='flex',
                             flex_flow='column',
