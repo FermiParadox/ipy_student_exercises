@@ -1,19 +1,18 @@
 import abc
 import random
-import sympy
-import mpmath
 import re
 
-from sympy import sympify
+import mpmath
+import sympy
 from IPython.display import display
+from sympy import sympify
 
-
-import languages
-import arbitrary_pieces
 import answer_patterns
-from never_importer import UnexpectedValueError
+import arbitrary_pieces
+import languages
 from arbitrary_pieces import r_int, solve_1rst_degree_poly
-from qa_display_widgets import QADisplayBox, FillGapsBox
+from ipython_ui.qa_display_widgets import QADisplayBox, FillGapsBox
+from never_importer import UnexpectedValueError
 
 
 class Exercise(metaclass=abc.ABCMeta):
@@ -38,7 +37,7 @@ class Exercise(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractproperty
-    def answers(self):
+    def expected_answers(self):
         """
         Return all variable names along with their expected values.
         The reason this is a dict is because some exercises
@@ -174,7 +173,7 @@ class Exercise(metaclass=abc.ABCMeta):
     # (contains *args since it's used as callback)
     def check_all_answers(self, answers_given, *args):
         print(answers_given)
-        self._check_all_answers(answers=answers_given, expected_answers=self.answers)
+        return self._check_all_answers(answers=answers_given, expected_answers=self.expected_answers)
 
 
 class SolveForXLinear(Exercise):
@@ -267,7 +266,7 @@ class SolveForXLinear(Exercise):
         return final_string.replace('x', self.var_name)
 
     @property
-    def answers(self):
+    def expected_answers(self):
         left_str, right_str = self.question.replace(' ', '').split('=')
         left_sympified = sympify(left_str)
         right_sympified = sympify(right_str)
@@ -303,11 +302,11 @@ class SolveForXLinear(Exercise):
 if __name__ == '__main__':
     _inst = SolveForXLinear(difficulty=3)
     print(_inst.question)
-    print(_inst.answers)
+    print(_inst.expected_answers)
     while 1:
         _inst = SolveForXLinear(difficulty=2)
         _ques = _inst.question
-        _ans = _inst.answers
+        _ans = _inst.expected_answers
         if isinstance(_ans['x'], arbitrary_pieces.AnyNumber):
             print(_ques)
             print(_ans)

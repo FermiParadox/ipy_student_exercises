@@ -108,16 +108,25 @@
             size_hint_y: .4
             padding: '3sp'
             exercise: root.exercise
-            answers_given: {k: '' for k in root.exercise.answers}
+            answers_given: {k: '' for k in root.exercise.expected_answers}
         Button:
             text: languages.CHECK_MY_ANSWER_MSG
             background_color: 0,1,0,1
             border: 0,0,0,0
             size_hint_y: None
             height: '30sp'
-            on_release: if root.exercise.check_all_answers(answers_given=answers_input_box.answers_given): print(6666)
-        Label:
+            on_release: if root.exercise.check_all_answers(answers_given=answers_input_box.answers_given): print('correct!')
+        Button:
+            text: languages.REVEAL_ANSWER
+            background_color: 1,0,0,1
+            border: 0,0,0,0
+            size_hint_x: .4
+            size_hint_y: None
+            height: '30sp'
+            on_release:
+        RevealedAnswersBox:
             size_hint_y: .4
+            expected_answers: root.exercise.expected_answers
 
 
     BoxLayout:

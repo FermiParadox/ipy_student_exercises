@@ -27,3 +27,8 @@ class Test_sometimes_replace_1x_with_x(TestCase):
             final_expr = sometimes_replace_1x_with_x(expr, var_name='y')
             self.assertEqual(expr, final_expr)
 
+    def test_decimals_not_converted(self):
+        for _ in range(REPETITIONS):
+            num1x_expr = '{}.1x'.format(randint(1, 100))
+            final_expr = sometimes_replace_1x_with_x(num1x_expr, var_name='x')
+            self.assertEqual(num1x_expr, final_expr)

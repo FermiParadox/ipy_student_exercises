@@ -1,9 +1,11 @@
+import abc
 import random
 import re
 import itertools
 import sympy
 from sympy.abc import x
 
+import languages
 from never_importer import UnexpectedValueError
 
 
@@ -105,10 +107,10 @@ def r_int(bounds, pos_neg_0='+-0', excluded=(), weights=None) -> int:
 def sometimes_replace_1x_with_x(expr, var_name):
     """
     Half of the time converts "1x" to "x".
-    "31x" will always remain the same.
+    "31x", "461x", "4.1x", etc will always remain the same.
     """
     if random.choice([0, 1]):
-        expr = re.sub(r'(?<![0-9])1{}'.format(var_name), r'{}'.format(var_name), expr)
+        expr = re.sub(r'(?<![0-9.])1{}'.format(var_name), r'{}'.format(var_name), expr)
     return expr
 
 
@@ -146,16 +148,50 @@ def consecutive_operators_search(expr):
 
 
 # ---------------------------------------------------------------------------------
-class SpecialAnswerType(object):
-    pass
+
+ANY_NUM_SHORT_DESCRIPTION_MSG = languages.Message(
+    texts_dct={
+        languages.english: 'Any number.',
+        languages.greek: 'Οποιοσδήποτε αριθμός',
+    })
+
+NO_SOLUTION_SHORT_DESCRIPTION_MSG = languages.Message(
+    texts_dct={
+        languages.english: 'No solution',
+        languages.greek: 'Καμία λύση',
+    })
+
+ANY_NUM_LONG_DESCRIPTION_MSG = languages.Message(
+    texts_dct={
+        languages.english: 'Any number is a solution.',
+        languages.greek: 'Οποιοσδήποτε αριθμός αποτελεί λύση.',
+    })
+
+NO_SOLUTION_LONG_DESCRIPTION_MSG = languages.Message(
+    texts_dct={
+        languages.english: 'No solution exists.',
+        languages.greek: 'Δεν υπάρχει λύση.',
+    })
+
+
+class SpecialAnswerType(metaclass=abc.ABCMeta):
+    @abc.abstractproperty
+    def button_text(self):
+        pass
+
+    @abc.abstractproperty
+    def long_description(self):
+        pass
 
 
 class AnyNumber(SpecialAnswerType):
-    button_text = 'Any number.'
+    button_text = ANY_NUM_SHORT_DESCRIPTION_MSG
+    long_description = ANY_NUM_LONG_DESCRIPTION_MSG
 
 
 class NoSolution(SpecialAnswerType):
-    button_text = 'No solution.'
+    button_text = NO_SOLUTION_SHORT_DESCRIPTION_MSG
+    long_description = NO_SOLUTION_LONG_DESCRIPTION_MSG
 
 
 SPECIAL_ANSWERS_TYPES = tuple(class_children(SpecialAnswerType))

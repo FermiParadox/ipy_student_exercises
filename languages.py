@@ -66,14 +66,14 @@ class Message(str):
 
 # Template
 """
-Message(
+= Message(
     texts_dct={
         english: ,
         greek: ,
     })
 
 
-Message(
+= languages.Message(
     texts_dct={
         languages.english: ,
         languages.greek: ,
@@ -97,6 +97,12 @@ CHECK_MY_ANSWER_MSG = Message(
     texts_dct={
         english: 'Check my answer.',
         greek: 'Έλεγξε απάντηση.',
+    })
+
+REVEAL_ANSWER = Message(
+    texts_dct={
+        english: 'Reveal answer.',
+        greek: 'Αποκάλυψε απάντηση.',
     })
 
 TYPE_ANSWER_PROMPT_MSG = Message(

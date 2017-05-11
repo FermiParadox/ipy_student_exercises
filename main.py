@@ -31,6 +31,7 @@ from kivy.uix.carousel import Carousel
 from kivy import platform
 
 
+import arbitrary_pieces
 import attributions
 import exercises
 import languages
@@ -146,13 +147,16 @@ class VBoxLayout(BoxLayout):
 
 
 # -----------------------------------------------------------------------------------------------
-_INITIAL_EXERCISE = exercises.SolveForXLinear()
+_INITIAL_EXERCISE = exercises.SolveForXLinear(difficulty=2)
+
 
 class LatexWidget(ScatterLayout):
     text = StringProperty('')
 
     def __init__(self, **kwargs):
-        super(LatexWidget, self).__init__(do_rotation=False, do_translation=False, **kwargs)
+        super(LatexWidget, self).__init__(
+            do_rotation=False, do_translation=False,
+            **kwargs)
 
     @staticmethod
     def latex_image(latex_str):
@@ -178,6 +182,7 @@ class AnswersInputBox(BoxLayout):
     def __init__(self, **kwargs):
         super(AnswersInputBox, self).__init__(**kwargs)
         self.textinputs_box = BoxLayout(orientation='vertical', padding='3sp')
+        self.textinputs_lst = []
         self.add_widget(self.textinputs_box)
         self.specials_buttons_box = BoxLayout(orientation='vertical', size_hint_x=.3)
         self.add_widget(self.specials_buttons_box)
@@ -189,25 +194,32 @@ class AnswersInputBox(BoxLayout):
         self.answers_given[obj.answer_name_] = obj.text
 
     def populate_textinputs_box(self, *args):
-        for a_key in self.exercise.answers:
+        self.textinputs_lst = []
+        for a_key in self.exercise.expected_answers:
             label_text = '{}= '.format(a_key)
             single_text_box = BoxLayout(size_hint_y=None, height='30sp')
             single_text_box.add_widget(Label(text=label_text, size_hint_x=.2))
             txt_input = TextInput(hint_text=languages.TYPE_ANSWER_PROMPT_MSG, multiline=False)
             txt_input.answer_name_ = a_key
-            txt_input.bind(on_text=self.set_input_text_to_answer
+            txt_input.bind(text=self.set_input_text_to_answer)
+            self.textinputs_lst.append(txt_input)
             single_text_box.add_widget(txt_input)
             self.textinputs_box.add_widget(single_text_box)
 
     def set_special_answer_to_answers(self, *args):
         obj = args[0]
-        self.answers_given[8]
+        # (text must be changed first otherwise answers will change twice `on_text`)
+        for i in self.textinputs_lst:
+            i.text = ''
+        for a in self.answers_given:
+            self.answers_given[a] = obj.special_val_
 
     def populate_specials_buttons_box(self, *args):
         for a_class in self.exercise.special_answers_allowed:
             b = Button(text=a_class.button_text,
                        size_hint_y=None, height='30sp',
                        border=(0,0,0,0))
+            b.special_val_ = a_class
             b.bind(on_release=self.set_special_answer_to_answers)
             self.specials_buttons_box.add_widget(b)
 
@@ -217,6 +229,32 @@ class AnswersInputBox(BoxLayout):
 
     def on_exercise(self, *args):
         self.populate_everything()
+
+
+class RevealedAnswersBox(BoxLayout):
+    expected_answers = ObjectProperty(_INITIAL_EXERCISE.expected_answers)
+
+    def __init__(self, **kwargs):
+        super(RevealedAnswersBox, self).__init__(**kwargs)
+        self.main_content_box = BoxLayout()
+        self.add_widget(self.main_content_box)
+        self.set_main_label()
+
+    def set_main_label(self, *args):
+        special_found = set(arbitrary_pieces.SPECIAL_ANSWERS_TYPES) & set(self.expected_answers.values())
+        if special_found:
+            w = Label(text=list(special_found)[0].long_description)
+        else:
+            w = LatexWidget(text=self.all_answers_as_latex_str())
+        self.main_content_box.clear_widgets()
+        self.main_content_box.add_widget(w)
+
+    def all_answers_as_latex_str(self):
+        non_latex_s = ''
+        for a_name in sorted(self.expected_answers):
+            a_val = self.expected_answers[a_name]
+            non_latex_s += '{}={}'.format(a_name, a_val)
+        return '${}$'.format(non_latex_s)
 
 
 class MainWidget(Carousel):

@@ -109,7 +109,7 @@ class Test__check_all_answers(TestCase):
         for q, answers_lst in dct.items():
             inst.question = q
             for a in answers_lst:
-                expected_a = inst.answers['x']
+                expected_a = inst.expected_answers['x']
                 assert_f(inst._check_all_answers(answers={'x': a}, expected_answers={'x': expected_a}),
                          msg='\nGiven answer: {}\nExpected: {}'.format(a, expected_a))
 

@@ -12,7 +12,7 @@ class FillGapsBox(QADisplayBox):
 
     def __init__(self, qa_obj):
         self.qa_obj = qa_obj
-        self.expected_answers = self.qa_obj.answers
+        self.expected_answers = self.qa_obj.expected_answers
         self.special_answers_allowed = self.qa_obj.special_answers_allowed
         self.question_title = self.qa_obj.question_title
         self.question_in_latex = self.qa_obj.question_in_latex
