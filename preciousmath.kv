@@ -51,6 +51,18 @@
 
 
 # -------------------------------------------------------------------------------
+<UserReactionToRevealedAnswersBox>:
+    Button:
+        id: ok_button
+        text: languages.OK_MSG
+        size_hint_y: None
+        height: main.STANDARD_BUTTON_HEIGHT
+    Button:
+        id: report_bug_button
+        text: languages.REPORT_BUG_MSG
+        size_hint_y: None
+        height: main.STANDARD_BUTTON_HEIGHT
+
 <MainWidget>:
     canvas.before:
         Color:
@@ -71,7 +83,7 @@
             pos_hint: {'center_x': .5, 'center_y': .8}
             size_hint: .9, .1
             text: main.APP_NAME
-            font_size: '30sp'
+            font_size: main.STANDARD_BUTTON_HEIGHT
         BoxLayout:
             pos_hint: {'center_x': .5, 'center_y': .5}
             size_hint: .5, .35
@@ -109,7 +121,8 @@
             font_size: '15sp'
         LatexWidget:
             text: root.exercise.question_in_latex
-            size_hint_y: .1
+            size_hint: .8, .2
+            pos_hint: {'center_x': .5, 'center_y': .5}
         AnswersInputBox:
             id: answers_input_box
             size_hint_y: .4
@@ -121,18 +134,20 @@
             background_color: 0,1,0,1
             border: 0,0,0,0
             size_hint_y: None
-            height: '30sp'
+            height: main.STANDARD_BUTTON_HEIGHT
             on_release: if root.exercise.check_all_answers(answers_given=answers_input_box.answers_given): print('correct!')
         Button:
             text: languages.REVEAL_ANSWER
             background_color: 1,0,0,1
             border: 0,0,0,0
-            size_hint_x: .4
-            size_hint_y: None
-            height: '30sp'
-            on_release:
+            size_hint: .4, None
+            pos_hint: {'right': 1}
+            height: main.STANDARD_BUTTON_HEIGHT
+            on_release: revealed_answers_box.show_main_content()
         RevealedAnswersBox:
-            size_hint_y: .4
+            id: revealed_answers_box
+            size_hint: .8, .3
+            pos_hint: {'center_x': .5, 'center_y': .5}
             expected_answers: root.exercise.expected_answers
 
 

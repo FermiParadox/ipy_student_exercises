@@ -40,7 +40,7 @@ import languages
 __version__ = '0.0.1'
 
 APP_NAME = 'Free edu'
-
+STANDARD_BUTTON_HEIGHT = '30sp'
 
 # -----------------------------------------------------------------------------------------------
 THIRD_PARTIES_IMAGES_DIR = 'third_parties_images'
@@ -154,29 +154,29 @@ class VBoxLayout(BoxLayout):
 _INITIAL_EXERCISE = exercises.SolveForXLinear(difficulty=2)
 
 
-class LatexWidget(ScatterLayout):
+class LatexWidget(BoxLayout):
     text = StringProperty('')
 
     def __init__(self, **kwargs):
-        super(LatexWidget, self).__init__(
-            do_rotation=False, do_translation=False,
-            **kwargs)
+        self.scatterlayout = ScatterLayout(do_rotation=False, do_translation_y=False)
+        super(LatexWidget, self).__init__(**kwargs)
+        self.add_widget(self.scatterlayout)
 
     @staticmethod
     def latex_image(latex_str):
         fig, ax = pyplot.subplots()
         ax.axis('off')
-        ax.text(0.5, 0.5, latex_str,
-                size=15,
+        ax.text(.5, .5, latex_str,
+                size=20,
                 horizontalalignment='center', verticalalignment='center',
                 bbox={})
         return FigureCanvasKivyAgg(fig)
 
     def on_text(self, *args):
-        if self.children:
-            self.remove_widget(self.children[0])
+        if self.scatterlayout.children:
+            self.remove_widget(self.scatterlayout.children[0])
         im = LatexWidget.latex_image(self.text)
-        self.add_widget(im)
+        self.scatterlayout.add_widget(im)
 
 
 class LicensesWidget(BoxLayout):
@@ -193,7 +193,7 @@ class LicensesWidget(BoxLayout):
         from about_module import LICENSES_DCT
         for _name, licence in LICENSES_DCT.items():
             name = _name.capitalize()
-            b = Button(text=name, bold=True, size_hint_y=None, height='30sp', border=(0,0,0,0))
+            b = Button(text=name, bold=True, size_hint_y=None, height=STANDARD_BUTTON_HEIGHT, border=(0,0,0,0))
             b.popup_title = boldify(txt_str=name)
             b.license_txt = licence
             b.bind(on_release=self.on_button_release)
@@ -227,7 +227,7 @@ class AnswersInputBox(BoxLayout):
         self.textinputs_lst = []
         for a_key in self.exercise.expected_answers:
             label_text = '{}= '.format(a_key)
-            single_text_box = BoxLayout(size_hint_y=None, height='30sp')
+            single_text_box = BoxLayout(size_hint_y=None, height=STANDARD_BUTTON_HEIGHT)
             single_text_box.add_widget(Label(text=label_text, size_hint_x=.2))
             txt_input = TextInput(hint_text=languages.TYPE_ANSWER_PROMPT_MSG, multiline=False)
             txt_input.answer_name_ = a_key
@@ -247,7 +247,7 @@ class AnswersInputBox(BoxLayout):
     def populate_specials_buttons_box(self, *args):
         for a_class in self.exercise.special_answers_allowed:
             b = Button(text=a_class.button_text,
-                       size_hint_y=None, height='30sp',
+                       size_hint_y=None, height=STANDARD_BUTTON_HEIGHT,
                        border=(0,0,0,0))
             b.special_val_ = a_class
             b.bind(on_release=self.set_special_answer_to_answers)
@@ -261,23 +261,37 @@ class AnswersInputBox(BoxLayout):
         self.populate_everything()
 
 
+class UserReactionToRevealedAnswersBox(BoxLayout):
+    pass
+
+
 class RevealedAnswersBox(BoxLayout):
     expected_answers = ObjectProperty(_INITIAL_EXERCISE.expected_answers)
 
     def __init__(self, **kwargs):
         super(RevealedAnswersBox, self).__init__(**kwargs)
-        self.main_content_box = BoxLayout()
-        self.add_widget(self.main_content_box)
-        self.set_main_label()
+        self.latex_widg = LatexWidget()
+        self.label_widg = Label()
+        self.main_content_box = BoxLayout(orientation='vertical')
+        self.user_reaction_options_box = UserReactionToRevealedAnswersBox()
+        self.user_reaction_options_box.ids.ok_button.bind(on_release=self.on_ok_button_release)
+        self.main_content_box.add_widget(Label(text=languages.CORRECT_ANSWER_IS_MSG))
+        self.main_content_box.add_widget(self._main_label())
+        self.main_content_box.add_widget(self.user_reaction_options_box)
 
-    def set_main_label(self, *args):
+    def _main_label(self):
         special_found = set(arbitrary_pieces.SPECIAL_ANSWERS_TYPES) & set(self.expected_answers.values())
         if special_found:
-            w = Label(text=list(special_found)[0].long_description)
+            w = self.label_widg
+            w.text = list(special_found)[0].long_description
         else:
-            w = LatexWidget(text=self.all_answers_as_latex_str())
-        self.main_content_box.clear_widgets()
-        self.main_content_box.add_widget(w)
+            w = self.latex_widg
+            w.text = self.all_answers_as_latex_str()
+        return w
+
+    def show_main_content(self, *args):
+        self.clear_widgets()
+        self.add_widget(self.main_content_box)
 
     def all_answers_as_latex_str(self):
         non_latex_s = ''
@@ -285,6 +299,10 @@ class RevealedAnswersBox(BoxLayout):
             a_val = self.expected_answers[a_name]
             non_latex_s += '{}={}'.format(a_name, a_val)
         return '${}$'.format(non_latex_s)
+
+    def on_ok_button_release(self, *args):
+        self.clear_widgets()
+        self.add_widget(Label())
 
 
 class MainWidget(Carousel):

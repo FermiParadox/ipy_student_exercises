@@ -110,3 +110,22 @@ TYPE_ANSWER_PROMPT_MSG = Message(
         english: '(type the answer)',
         greek: '(γράψε την απάντηση)',
     })
+
+OK_MSG = Message(
+    texts_dct={
+        english: 'OK',
+        greek: 'Εντάξει',
+    })
+
+REPORT_BUG_MSG = Message(
+    texts_dct={
+        english: 'Report bug',
+        greek: 'Αναφορά σφάλματος',
+    })
+
+CORRECT_ANSWER_IS_MSG = Message(
+    texts_dct={
+        english: 'The correct answer is:',
+        greek: 'Η σωστή απάντηση είναι:',
+    })
+
