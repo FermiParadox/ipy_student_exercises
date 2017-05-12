@@ -10,9 +10,8 @@ from sympy import sympify
 import answer_patterns
 import arbitrary_pieces
 import languages
-from arbitrary_pieces import r_int, solve_1rst_degree_poly
+from arbitrary_pieces import r_int, solve_1rst_degree_poly, UnexpectedValueError
 from ipython_ui.qa_display_widgets import QADisplayBox, FillGapsBox
-from never_importer import UnexpectedValueError
 
 
 class Exercise(metaclass=abc.ABCMeta):

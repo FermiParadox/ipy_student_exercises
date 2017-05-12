@@ -24,6 +24,13 @@
             pos: self.pos
             size: self.size
 
+<Popup>:
+    separator_color: 0,0,0,1
+    title_color: 0,0,0,1
+
+<PlaceholderLabel@Label>
+
+
 # Class code below (including the corresponding in main.py)
 # by Alexander Taylor
 # from https://github.com/kivy/kivy/wiki/Scrollable-Label
@@ -139,3 +146,5 @@
             bold: True
         ScrollLabel:
             text: about_module.ABOUT_TEXT
+        LicensesWidget
+        PlaceholderLabel

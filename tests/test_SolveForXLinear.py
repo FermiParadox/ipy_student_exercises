@@ -115,7 +115,7 @@ class Test__check_all_answers(TestCase):
 
     def test_correct_answers(self):
         dct = {
-            '2*x-1=0': ['1/2', '+1/2', '(+1)/2', '0.5', '0.50000000000000000000000001'],
+            '2*x-1=0': ['1/2', '+1/2', '0.5', '0.50000000000000000000000001'],
             '0*x-0=0': [AnyNumber],
             '0*x-1=0': [NoSolution],
         }
@@ -123,7 +123,7 @@ class Test__check_all_answers(TestCase):
 
     def test_incorrect_answers(self):
         dct = {
-            '2*x-1=0': ['-1/2', '1.0/2', '(1)/2', '-0.5', '0.51'],
+            '2*x-1=0': ['-1/2', '1.0/2', '(1)/2', '(-1)/2', '-0.5', '0.51'],
             '0*x-0=0': ['6', '-', '=+-', NoSolution],
             '0*x-1=0': ['6', '-', '=+-', AnyNumber],
         }

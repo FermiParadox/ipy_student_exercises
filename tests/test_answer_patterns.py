@@ -94,8 +94,9 @@ class TestEachPattern(TestCase):
     def _does_not_find2patterns(self, bounds_strs_lst, pattern):
         return self._find2patterns_base(bounds_strs_lst=bounds_strs_lst, searched_patt=pattern, _y_n='n')
 
-    # TEMPLATE: fullmatch
+    # TEMPLATE
     """
+    # --------------------------------------------------------------------------------------------
     # ?
     def test_fullmatch_?(self):
         self._does_fullmatch(lst_of_strs=[?],
@@ -105,21 +106,18 @@ class TestEachPattern(TestCase):
         self._does_not_fullmatch(lst_of_strs=[?],
                                  pattern=answer_patterns.?)
 
-    """
-
-    # TEMPLATE: find_m_patterns
-    """
     def test_find2patterns_?(self):
         lst = [?]
         self._does_find2patterns(bounds_strs_lst=lst,
-                           pattern=answer_patterns.?)
+                                 pattern=answer_patterns.?)
 
     def test_not_find2patterns_?(self):
         lst = [?]
         self._does_not_find2patterns(bounds_strs_lst=lst,
-                               pattern=answer_patterns.?)
+                                     pattern=answer_patterns.?)
     """
 
+    # --------------------------------------------------------------------------------------------
     # INTEGER
     def test_fullmatch_INTEGER(self):
         self._does_fullmatch(lst_of_strs=['123', '-24', '0', '-0', '+0', '+2'],
@@ -139,6 +137,7 @@ class TestEachPattern(TestCase):
         self._does_not_find2patterns(bounds_strs_lst=lst,
                                      pattern=answer_patterns.INTEGER)
 
+    # --------------------------------------------------------------------------------------------
     # DECIMAL
     def test_fullmatch_DECIMAL(self):
         self._does_fullmatch(lst_of_strs=['1.3', '0.004', '-1888.2', '+488.2', '0.0', '-0.0', '+0.0'],
@@ -158,21 +157,42 @@ class TestEachPattern(TestCase):
         self._does_not_find2patterns(bounds_strs_lst=lst,
                                      pattern=answer_patterns.DECIMAL)
 
+    # --------------------------------------------------------------------------------------------
     # FRACTION_OF_INTS
     def test_fullmatch_FRACTION_OF_INTS(self):
-        self._does_fullmatch(lst_of_strs=['-1/3', '(+2)/4', '(-95)/(+34)'],
+        self._does_fullmatch(lst_of_strs=['-1/7', '877/9087'],
                              pattern=answer_patterns.FRACTION_OF_INTS.with_sign)
 
     def test_not_fullmatch_FRACTION_OF_INTS(self):
-        self._does_not_fullmatch(lst_of_strs=['2/3.0', '(1)/2', '-x4/2', '1.2'],
-                                 pattern=answer_patterns.FRACTION_OF_INTS.with_sign)
+        self._does_not_fullmatch(lst_of_strs=['1/5+7', '(-2)/4', '.9/2', '1/9/7'],
+                                 pattern=answer_patterns.FRACTION_OF_INTS)
 
     def test_find2patterns_FRACTION_OF_INTS(self):
-        lst = ['1/3+4/20*0.1', '400/2-200/777', '(-10)/(+4)-4/20']
+        lst = ['1/3+7/8-0', '-2/566-(9/8)+(-11)/3']
         self._does_find2patterns(bounds_strs_lst=lst,
-                                 pattern=answer_patterns.FRACTION_OF_INTS.with_sign)
+                                 pattern=answer_patterns.FRACTION_OF_INTS)
 
     def test_not_find2patterns_FRACTION_OF_INTS(self):
+        lst = ['1/8+9/7+0/8']
+        self._does_not_find2patterns(bounds_strs_lst=lst,
+                                     pattern=answer_patterns.FRACTION_OF_INTS)
+
+    # --------------------------------------------------------------------------------------------
+    # FRACTION_OF_INTS_WITH_PARENTHESES
+    def test_fullmatch_FRACTION_OF_INTS_WITH_PARENTHESES(self):
+        self._does_fullmatch(lst_of_strs=['-1/3', '(+2)/4', '(-95)/(+34)'],
+                             pattern=answer_patterns.FRACTION_OF_INTS_WITH_PARENTHESES.with_sign)
+
+    def test_not_fullmatch_FRACTION_OF_INTS_WITH_PARENTHESES(self):
+        self._does_not_fullmatch(lst_of_strs=['2/3.0', '(1)/2', '-x4/2', '1.2'],
+                                 pattern=answer_patterns.FRACTION_OF_INTS_WITH_PARENTHESES.with_sign)
+
+    def test_find2patterns_FRACTION_OF_INTS_WITH_PARENTHESES(self):
+        lst = ['1/3+4/20*0.1', '400/2-200/777', '(-10)/(+4)-4/20']
+        self._does_find2patterns(bounds_strs_lst=lst,
+                                 pattern=answer_patterns.FRACTION_OF_INTS_WITH_PARENTHESES.with_sign)
+
+    def test_not_find2patterns_FRACTION_OF_INTS_WITH_PARENTHESES(self):
         lst = ['1/2.3+1/4', '(-1)/2/4']
         self._does_not_find2patterns(bounds_strs_lst=lst,
-                                     pattern=answer_patterns.FRACTION_OF_INTS.with_sign)
+                                     pattern=answer_patterns.FRACTION_OF_INTS_WITH_PARENTHESES.with_sign)

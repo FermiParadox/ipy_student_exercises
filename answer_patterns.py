@@ -100,9 +100,11 @@ find_m_patterns = _PatternBase.findall
 
 # (Using `re.compile` for visibility provided by IDE)
 # Patterns must account for the fact that variables might be named 'x1'.
+# TODO: Add examples and counter-examples here that are automatically checked by PatternBase
 INTEGER = _PatternBase(re.compile(r'(?<![a-zA-Z0-9.])\d+(?!\.)'))
 DECIMAL = _PatternBase(re.compile(r'(?<![a-zA-Z0-9.])\d+\.\d+'))
-FRACTION_OF_INTS = _PatternBase(
+FRACTION_OF_INTS = _PatternBase(re.compile(r'{i}/{i}'.format(i=INTEGER)))
+FRACTION_OF_INTS_WITH_PARENTHESES = _PatternBase(
     re.compile(r'(?:{i}/{i})|(?:\({s}{i}\)/{i})|(?:{i}/\({s}{i}\))|(?:\({s}{i}\)/\({s}{i}\))'.format(i=INTEGER,
                                                                                                      s=PLUS_OR_MINUS_PATT)))
 

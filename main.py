@@ -80,6 +80,10 @@ BLUE_RGBA = 0,0,1,1
 RED_RGBA = 1,0,0,1
 
 
+def boldify(txt_str):
+    return '[b]{}[/b]'.format(txt_str)
+
+
 # -----------------------------------------------------------------------------------------------
 class MyProgressBar(Widget):
     DEFAULT_FILLED_COLOR = 0,1,0,1
@@ -173,6 +177,32 @@ class LatexWidget(ScatterLayout):
             self.remove_widget(self.children[0])
         im = LatexWidget.latex_image(self.text)
         self.add_widget(im)
+
+
+class LicensesWidget(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(LicensesWidget, self).__init__(orientation='vertical', **kwargs)
+        self.popup = Popup(size_hint=(.9, .7))
+        self.popup_content = ScrollLabel()
+        self.popup.add_widget(self.popup_content)
+        self.populate_widg()
+
+    def populate_widg(self):
+        self.add_widget(Label(text=boldify('Licenses'), size_hint_y=None, height='40sp'))
+        from about_module import LICENSES_DCT
+        for _name, licence in LICENSES_DCT.items():
+            name = _name.capitalize()
+            b = Button(text=name, bold=True, size_hint_y=None, height='30sp', border=(0,0,0,0))
+            b.popup_title = boldify(txt_str=name)
+            b.license_txt = licence
+            b.bind(on_release=self.on_button_release)
+            self.add_widget(b)
+
+    def on_button_release(self, *args):
+        self.popup.title = args[0].popup_title
+        self.popup_content.text = args[0].license_txt
+        self.popup.open()
 
 
 class AnswersInputBox(BoxLayout):

@@ -6,7 +6,14 @@ import sympy
 from sympy.abc import x
 
 import languages
-from never_importer import UnexpectedValueError
+
+
+# ---------------------------------------------------------------------------------
+class UnexpectedValueError(Exception):
+    """Used for Exceptions that should not be handled,
+    instead of an existing Exception (to prevent accidental handling during `try`).
+    """
+    pass
 
 
 # ---------------------------------------------------------------------------------
