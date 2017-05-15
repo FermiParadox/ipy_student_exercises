@@ -21,7 +21,15 @@ class Exercise(metaclass=abc.ABCMeta):
         self.display_class = display_class
         self.question_title = self._question_title()
         self.question = self._question()
+        self.question_in_latex = arbitrary_pieces.placeholder
+        self.expected_answers = arbitrary_pieces.placeholder
+        self.expected_answers_in_latex = arbitrary_pieces.placeholder
+        self._create_remaining_data_based_on_question()
+
+    def _create_remaining_data_based_on_question(self):
         self.question_in_latex = self._question_in_latex()
+        self.expected_answers = self._expected_answers()
+        self.expected_answers_in_latex = self._expected_answers_in_latex()
 
     @abc.abstractmethod
     def _question_title(self):
@@ -35,18 +43,38 @@ class Exercise(metaclass=abc.ABCMeta):
     def _question_in_latex(self):
         pass
 
-    @abc.abstractproperty
-    def expected_answers(self):
+    @abc.abstractmethod
+    def _expected_answers(self):
         """
         Return all variable names along with their expected values.
         The reason this is a dict is because some exercises
         will have multiple solutions, eg. polynomials.
 
         When there is "no solution" (eg. `x**2 = 1` in Real domain),
-        _all_ answers should have the equivalent NoSolution object assigned.
+        *all* answers should have the equivalent NoSolution object assigned.
         Same goes for "any number", etc.
 
         :return: (dict)
+        """
+        pass
+
+    # TODO test
+    @staticmethod
+    def _default_simpify_and_convert_to_latex(expected_answers_dct):
+        d = {}
+        for ans_name, ans_val in expected_answers_dct.items():
+            if ans_val in arbitrary_pieces.SPECIAL_ANSWERS_TYPES:
+                d.update({ans_name: ans_val})
+            else:
+                v = sympy.latex(sympify(ans_val))
+                d.update({ans_name: v})
+
+    @abc.abstractmethod
+    def _expected_answers_in_latex(self):
+        """For most cases `sympy.latex` can be used to convert all answers to latex
+        by using `_default_simpify_and_convert_to_latex`.
+
+        When `sympy.latex` doesn't do the job adequately a custom method is needed.
         """
         pass
 
@@ -264,14 +292,16 @@ class SolveForXLinear(Exercise):
         final_string = final_string.replace('+-', '-')
         return final_string.replace('x', self.var_name)
 
-    @property
-    def expected_answers(self):
+    def _expected_answers(self):
         left_str, right_str = self.question.replace(' ', '').split('=')
         left_sympified = sympify(left_str)
         right_sympified = sympify(right_str)
         expr = left_sympified - right_sympified
         ans = solve_1rst_degree_poly(expr)
         return {self.VARIABLE_NAME: ans}
+
+    def _expected_answers_in_latex(self):
+        return Exercise._default_simpify_and_convert_to_latex(expected_answers_dct=self.expected_answers)
 
     def _is_valid_answer(self, answer):
         if answer in self.special_answers_allowed:
@@ -306,7 +336,7 @@ if __name__ == '__main__':
         _inst = SolveForXLinear(difficulty=2)
         _ques = _inst.question
         _ans = _inst.expected_answers
-        if isinstance(_ans['x'], arbitrary_pieces.AnyNumber):
+        if arbitrary_pieces.AnyNumber in _ans.values():
             print(_ques)
             print(_ans)
             break

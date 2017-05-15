@@ -206,7 +206,7 @@ class LicensesWidget(BoxLayout):
 
 
 class AnswersInputBox(BoxLayout):
-    exercise = ObjectProperty(_INITIAL_EXERCISE)
+    exercise = ObjectProperty()
     answers_given = DictProperty()
 
     def __init__(self, **kwargs):
@@ -216,14 +216,15 @@ class AnswersInputBox(BoxLayout):
         self.add_widget(self.textinputs_box)
         self.specials_buttons_box = BoxLayout(orientation='vertical', size_hint_x=.3)
         self.add_widget(self.specials_buttons_box)
-        self.populate_textinputs_box()
-        self.populate_specials_buttons_box()
+        Clock.schedule_once(self.populate_textinputs_box, .5)
+        Clock.schedule_once(self.populate_specials_buttons_box, .5)
 
     def set_input_text_to_answer(self, *args):
         obj = args[0]
         self.answers_given[obj.answer_name_] = obj.text
 
     def populate_textinputs_box(self, *args):
+        self.textinputs_box.clear_widgets()
         self.textinputs_lst = []
         for a_key in self.exercise.expected_answers:
             label_text = '{}= '.format(a_key)
@@ -245,6 +246,7 @@ class AnswersInputBox(BoxLayout):
             self.answers_given[a] = obj.special_val_
 
     def populate_specials_buttons_box(self, *args):
+        self.specials_buttons_box.clear_widgets()
         for a_class in self.exercise.special_answers_allowed:
             b = Button(text=a_class.button_text,
                        size_hint_y=None, height=STANDARD_BUTTON_HEIGHT,
@@ -266,53 +268,66 @@ class UserReactionToRevealedAnswersBox(BoxLayout):
 
 
 class RevealedAnswersBox(BoxLayout):
-    expected_answers = ObjectProperty(_INITIAL_EXERCISE.expected_answers)
+    expected_answers_in_latex = DictProperty({'x_placeholder': 'placeholder'})
+    reveal_button = ObjectProperty()
+    answers_input_box = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(RevealedAnswersBox, self).__init__(**kwargs)
         self.latex_widg = LatexWidget()
-        self.label_widg = Label()
+        self.special_answer_label = Label()
         self.main_content_box = BoxLayout(orientation='vertical')
         self.user_reaction_options_box = UserReactionToRevealedAnswersBox()
         self.user_reaction_options_box.ids.ok_button.bind(on_release=self.on_ok_button_release)
         self.main_content_box.add_widget(Label(text=languages.CORRECT_ANSWER_IS_MSG))
-        self.main_content_box.add_widget(self._main_label())
+        self.main_label_box = BoxLayout()   # main label goes in here
+        self.main_content_box.add_widget(self.main_label_box)
         self.main_content_box.add_widget(self.user_reaction_options_box)
 
     def _main_label(self):
         special_found = set(arbitrary_pieces.SPECIAL_ANSWERS_TYPES) & set(self.expected_answers.values())
         if special_found:
-            w = self.label_widg
+            w = self.special_answer_label
             w.text = list(special_found)[0].long_description
         else:
             w = self.latex_widg
             w.text = self.all_answers_as_latex_str()
         return w
 
+    def create_main_label(self, *args):
+        self.main_label_box.clear_widgets()
+        self.main_label_box.add_widget(self._main_label())
+
     def show_main_content(self, *args):
         self.clear_widgets()
+        self.create_main_label()
         self.add_widget(self.main_content_box)
 
     def all_answers_as_latex_str(self):
         non_latex_s = ''
-        for a_name in sorted(self.expected_answers):
+        for a_name in sorted(self.expected_answers_in_latex):
             a_val = self.expected_answers[a_name]
-            non_latex_s += '{}={}'.format(a_name, a_val)
+            non_latex_s += '{}={}'.format(a_name, a_val.replace('$', ''))
         return '${}$'.format(non_latex_s)
 
     def on_ok_button_release(self, *args):
         self.clear_widgets()
         self.add_widget(Label())
+        self.reveal_button.disabled = False
+        self.answers_input_box.disabled = False
+        app.root.exercise = exercises.SolveForXLinear(difficulty=2)
 
 
 class MainWidget(Carousel):
-    exercise = ObjectProperty(_INITIAL_EXERCISE)
+    exercise = ObjectProperty()
+    question_in_latex = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(MainWidget, self).__init__(**kwargs)
 
 
 class PreciousMathApp(App):
+
     def build(self):
         return MainWidget()
 
@@ -324,4 +339,5 @@ if __name__ == '__main__':
     except ImportError:
         pass
 
-    PreciousMathApp().run()
+    app = PreciousMathApp()
+    app.run()

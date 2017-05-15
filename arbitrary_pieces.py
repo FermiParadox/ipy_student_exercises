@@ -17,6 +17,57 @@ class UnexpectedValueError(Exception):
 
 
 # ---------------------------------------------------------------------------------
+# PLACEHOLDER
+
+class PlaceholderUsedError(Exception):
+    """
+    NOT TO BE HANDLED!
+    Raised when placeholder is accidentally used.
+    """
+    pass
+
+
+def _placeholder_error_func(*args, **kwargs):
+    raise PlaceholderUsedError
+
+
+class PlaceholderClass(object):
+    """
+    Used for adding an extra layer of bug preventions
+    when accidentally placeholders have not been removed.
+
+    WARNING: Some accidental uses of a placeholder will not raise an exception as they should.
+        Only most common usage is covered.
+    """
+
+    def __init__(self, allowed_values=None, data_type=None, non_restricted_choice=False):
+        self._allowed_values = allowed_values
+        self._data_type = data_type
+        self._non_restricted_choice = non_restricted_choice
+
+    @property
+    def allowed_values(self):
+        return self._allowed_values
+
+    @property
+    def allowed_type(self):
+        return self._data_type
+
+    @property
+    def non_restricted_choice(self):
+        return self._non_restricted_choice
+
+
+# TODO: add more methods
+SUPPRESSED_MAGIC_METHODS = ('__bool__', '__eq__', '__ge__', '__gt__', '__le__', '__lt__',
+                            '__ne__', '__get__', '__iter__', '__set__')
+for magic_method in SUPPRESSED_MAGIC_METHODS:
+    setattr(PlaceholderClass, magic_method, _placeholder_error_func)
+
+placeholder = PlaceholderClass()
+
+
+# ---------------------------------------------------------------------------------
 def delimiter(num_of_lines, line_type='-'):
     """
     Creates a newline and then a long line string.

@@ -39,15 +39,29 @@ import os
 
 
 kv = """
-<MainWidget>
+<MyB>:
+    v1: {1:[2,3]}
+    v2: self.v1[1]
+    v3: self.v1[1][1]
+    on_v1: print(1)
+    on_v2: print(2)
+    on_v3: print(3)
+
+    Button:
+        on_release: root.v1[1][1]=2
+        on_release: print('asd')
 
 """
 Builder.load_string(kv)
 
 
+class MyB(BoxLayout):
+    pass
+
+
 class MyApp(App):
     def build(self):
-        return Button()
+        return MyB()
 
 if __name__ == "__main__":
     MyApp().run()

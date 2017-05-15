@@ -1,6 +1,7 @@
 #:kivy 1.9.2
 
 #:import main main
+#:import exercises exercises
 #:import languages languages
 #:import about_module about_module
 
@@ -64,6 +65,16 @@
         height: main.STANDARD_BUTTON_HEIGHT
 
 <MainWidget>:
+    exercise: main._INITIAL_EXERCISE
+    question_in_latex: self.exercise.question_in_latex
+    question_title: self.exercise.question_title
+    expected_answers: self.exercise.expected_answers
+    expected_answers_in_latex: self.exercise.expected_answers_in_latex
+    on_exercise:
+        self.question_in_latex = self.exercise.question_in_latex;
+        self.question_title = self.exercise.question_title;
+        self.expected_answers = self.exercise.expected_answers
+
     canvas.before:
         Color:
             rgba: main.BACKGROUND_COLOR
@@ -117,10 +128,10 @@
         orientation: 'vertical'
         ScrollLabel:
             size_hint_y: .1
-            text: root.exercise.question_title
+            text: root.question_title
             font_size: '15sp'
         LatexWidget:
-            text: root.exercise.question_in_latex
+            text: root.question_in_latex
             size_hint: .8, .2
             pos_hint: {'center_x': .5, 'center_y': .5}
         AnswersInputBox:
@@ -128,7 +139,7 @@
             size_hint_y: .4
             padding: '3sp'
             exercise: root.exercise
-            answers_given: {k: '' for k in root.exercise.expected_answers}
+            answers_given: {k: '' for k in root.expected_answers}
         Button:
             text: languages.CHECK_MY_ANSWER_MSG
             background_color: 0,1,0,1
@@ -137,6 +148,7 @@
             height: main.STANDARD_BUTTON_HEIGHT
             on_release: if root.exercise.check_all_answers(answers_given=answers_input_box.answers_given): print('correct!')
         Button:
+            id: reveal_button
             text: languages.REVEAL_ANSWER
             background_color: 1,0,0,1
             border: 0,0,0,0
@@ -144,11 +156,16 @@
             pos_hint: {'right': 1}
             height: main.STANDARD_BUTTON_HEIGHT
             on_release: revealed_answers_box.show_main_content()
+            on_release: self.disabled = True
+            on_release: answers_input_box.disabled = True
         RevealedAnswersBox:
             id: revealed_answers_box
             size_hint: .8, .3
             pos_hint: {'center_x': .5, 'center_y': .5}
-            expected_answers: root.exercise.expected_answers
+            reveal_button: reveal_button
+            answers_input_box: answers_input_box
+            expected_answers_in_latex: root.expected_answers_in_latex
+            on_expected_answers_in_latex: self.create_main_label()
 
 
     BoxLayout:

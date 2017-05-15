@@ -108,6 +108,7 @@ class Test__check_all_answers(TestCase):
         inst = SolveForXLinear()
         for q, answers_lst in dct.items():
             inst.question = q
+            inst._create_remaining_data_based_on_question()
             for a in answers_lst:
                 expected_a = inst.expected_answers['x']
                 assert_f(inst._check_all_answers(answers={'x': a}, expected_answers={'x': expected_a}),
