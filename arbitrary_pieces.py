@@ -116,7 +116,7 @@ def r_int(bounds, pos_neg_0='+-0', excluded=(), weights=None) -> int:
     >>> r_int(7, '+0')
     # A negative int within [-5 to 3] excluding -4 and -1
     >>> r_int((-5, 3), '-', {-4, -1})
-    # Any int within [-1,4] with 3 having double the odds of appearing than the other ints
+    # Any int within [-1,4] with 3 having double the odds of appearing than any other int
     >>> r_int((-1, 4), weights={3: 2})
 
     :param bounds: Either a single int (the upper bound)
@@ -125,6 +125,8 @@ def r_int(bounds, pos_neg_0='+-0', excluded=(), weights=None) -> int:
         corresponding to positive, negative and 0.
     :param excluded: Numbers to be excluded.
     :param weights: Weights of individual numbers (each number has `weight = 1` by default)
+        To calculate the odds of a number appearing,
+        divide its weight by the total weights of all numbers.
     """
     if isinstance(bounds, int):
         b1, b2 = -bounds, bounds

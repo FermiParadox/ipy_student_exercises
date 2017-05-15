@@ -285,7 +285,7 @@ class RevealedAnswersBox(BoxLayout):
         self.main_content_box.add_widget(self.user_reaction_options_box)
 
     def _main_label(self):
-        special_found = set(arbitrary_pieces.SPECIAL_ANSWERS_TYPES) & set(self.expected_answers.values())
+        special_found = set(arbitrary_pieces.SPECIAL_ANSWERS_TYPES) & set(self.expected_answers_in_latex.values())
         if special_found:
             w = self.special_answer_label
             w.text = list(special_found)[0].long_description
@@ -306,8 +306,8 @@ class RevealedAnswersBox(BoxLayout):
     def all_answers_as_latex_str(self):
         non_latex_s = ''
         for a_name in sorted(self.expected_answers_in_latex):
-            a_val = self.expected_answers[a_name]
-            non_latex_s += '{}={}'.format(a_name, a_val.replace('$', ''))
+            a_val = self.expected_answers_in_latex[a_name]
+            non_latex_s += '{}={}'.format(a_name, a_val.strip('$'))
         return '${}$'.format(non_latex_s)
 
     def on_ok_button_release(self, *args):

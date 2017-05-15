@@ -37,6 +37,8 @@ from functools import partial
 import abc
 import os
 
+import arbitrary_pieces
+
 
 kv = """
 <MyB>:
@@ -64,5 +66,7 @@ class MyApp(App):
         return MyB()
 
 if __name__ == "__main__":
-    MyApp().run()
+    # MyApp().run()
 
+    for i in range(40):
+        print(arbitrary_pieces.r_int(10))
