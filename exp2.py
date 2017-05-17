@@ -1,11 +1,1 @@
-import random
-
-from arbitrary_pieces import r_int
-
-
-class C(object):
-    r = random.randint
-
-for i in range(40):
-    inst = C()
-    print(inst.r(0,10))
+# This is *not* under MIT; it's used for testing and might contain proprietary code
