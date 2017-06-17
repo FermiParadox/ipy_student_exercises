@@ -5,7 +5,6 @@ from re import compile, fullmatch
 import answer_patterns
 
 from answer_patterns import _PatternBase, PATTERNS
-from arbitrary_pieces import UnexpectedValueError
 
 
 # ---------------------------------------------------------------------------------
@@ -44,7 +43,7 @@ class Test_total_matches_within_bounds(TestCase):
     def test_invalid_input(self):
         for i in self.INVALID_INPUTS:
             from random import randint
-            self.assertRaises(UnexpectedValueError, _PatternBase.total_matches_within_bounds, randint(1, 1000), i)
+            self.assertRaises(ValueError, _PatternBase.total_matches_within_bounds, randint(1, 1000), i)
 
 
 class Test__check_duplicates_and_note_new_pattern(TestCase):
@@ -52,7 +51,7 @@ class Test__check_duplicates_and_note_new_pattern(TestCase):
 
     def test_duplicate_detected(self):
         _PatternBase(compile(r'1'), *self.FILLER_ARGS)
-        self.assertRaises(UnexpectedValueError, _PatternBase, compile(r'1'), *self.FILLER_ARGS)
+        self.assertRaises(ValueError, _PatternBase, compile(r'1'), *self.FILLER_ARGS)
 
     def test_noted_new_pattern(self):
         inst = _PatternBase(compile(r'x'), *self.FILLER_ARGS)
@@ -64,8 +63,8 @@ class Test_PatternBase(TestCase):
     FILLER_ARGS = 1,1,1
 
     def test_str_not_accepted(self):
-        self.assertRaises(UnexpectedValueError, _PatternBase, r'\d+', *self.FILLER_ARGS)
-        self.assertRaises(UnexpectedValueError, _PatternBase, '\d+', *self.FILLER_ARGS)
+        self.assertRaises(TypeError, _PatternBase, r'\d+', *self.FILLER_ARGS)
+        self.assertRaises(TypeError, _PatternBase, '\d+', *self.FILLER_ARGS)
 
 
 # ---------------------------------------------------------------------------------
@@ -93,7 +92,7 @@ class TestEachPattern(TestCase):
         m = 2
         m_str = 'm==2'
         for expr in getattr(pattern, 'two_matches'):
-            self.assertTrue(answer_patterns.find_m_patterns(compile_obj=pattern, expr=expr, bounds_str=m_str),
+            self.assertTrue(answer_patterns.found_m_patterns(compile_obj=pattern, expr=expr, bounds_str=m_str),
                             'Did not find {} times \nthe pattern: {} \nin the string: {}'.format(m, pattern, expr))
 
     def test_all_patterns_examples_and_non_examples(self):

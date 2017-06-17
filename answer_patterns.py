@@ -13,7 +13,7 @@ import re
 import operator
 
 
-from arbitrary_pieces import UnexpectedValueError, print_delimiter
+from arbitrary_pieces import print_delimiter
 
 
 _PLUS_OR_MINUS_PATT = r'(?:\+|-)'
@@ -54,13 +54,13 @@ class _PatternBase(str):
             inst = str.__new__(cls, patt)
         except AttributeError:
             # (`re.compile` objects contain `.pattern`)
-            raise UnexpectedValueError('`compile_obj` must be a `re.compile` object.')
+            raise TypeError('`compile_obj` must be a `re.compile` object.')
         if ('_' in patt) or (' ' in patt):
-            raise UnexpectedValueError('Pattern must not include whitespaces or "_".')
+            raise ValueError('Pattern must not include whitespaces or "_".')
         if not (fullmatch and no_fullmatch and two_matches):
             # No need to test if they are containers
             # since unit-testing would fail anyway if they weren't.
-            raise UnexpectedValueError('Expected non empty containers as match/mismatch examples.')
+            raise ValueError('Expected non empty containers as match/mismatch examples.')
         inst.__dict__.update({'with_sign': _MAYBE_PLUS_OR_MINUS_PATT + inst})
         inst.__dict__.update({'fullmatch': fullmatch, 'no_fullmatch': no_fullmatch, 'two_matches': two_matches})
         _PatternBase._check_duplicates_and_note_new_pattern(pattern=inst)
@@ -90,24 +90,23 @@ class _PatternBase(str):
                     within_2nd_bound = _PatternBase._ALLOWED_OCCURRENCE_STR_OPS[op2](m, num2)
                     return within_1st_bound and within_2nd_bound
         else:
-            raise UnexpectedValueError('Occurrence string {} not matching requirements.'.format(bounds_str))
+            raise ValueError('Bounds-string {} not matching requirements.'.format(bounds_str))
 
     @staticmethod
     def _check_duplicates_and_note_new_pattern(pattern):
         existing_patterns = [i for i in PATTERNS]
         if pattern in existing_patterns:
-            raise UnexpectedValueError('Following pattern exists more than once: {}'.format(pattern))
+            raise ValueError('Following pattern exists more than once: {}'.format(pattern))
         else:
             PATTERNS.append(pattern)
 
     @staticmethod
-    def findall(compile_obj, expr, bounds_str):
+    def found_m_patterns(compile_obj, expr, bounds_str):
         matches = re.findall(compile_obj, expr)
-        tot_matches_found = len(matches)
-        return _PatternBase.total_matches_within_bounds(m=tot_matches_found, bounds_str=bounds_str)
+        return _PatternBase.total_matches_within_bounds(m=len(matches), bounds_str=bounds_str)
 
 
-find_m_patterns = _PatternBase.findall
+found_m_patterns = _PatternBase.found_m_patterns
 
 
 # TEMPLATE

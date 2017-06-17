@@ -10,14 +10,14 @@ from sympy import sympify
 import answer_patterns
 import arbitrary_pieces
 import languages
-from arbitrary_pieces import r_int, solve_1rst_degree_poly, UnexpectedValueError
+from arbitrary_pieces import r_int, solve_1rst_degree_poly
 from ipython_ui.qa_display_widgets import QADisplayBox, FillGapsBox
 
 
 class Exercise(metaclass=abc.ABCMeta):
     def __init__(self, display_class):
         if not issubclass(self.DEFAULT_DISPLAY_CLASS, QADisplayBox):
-            raise UnexpectedValueError('{}'.format(self.DEFAULT_DISPLAY_CLASS))
+            raise TypeError('{}'.format(self.DEFAULT_DISPLAY_CLASS))
         self.display_class = display_class
         self.question_title = self._question_title()
         self.question = self._question()
@@ -226,10 +226,10 @@ class SolveForXLinear(Exercise):
         :param non_x_terms: number of terms not containing x
         """
         if difficulty not in self.ALLOWED_DIFFICULTIES:
-            raise UnexpectedValueError('Difficulty {}, not allowed'.format(difficulty))
+            raise ValueError('Difficulty {}, not allowed'.format(difficulty))
         if difficulty != max(self.ALLOWED_DIFFICULTIES):
             if (x_terms != self.DEFAULT_TERM_N_ON_HIGH_DIFF) or (non_x_terms != self.DEFAULT_TERM_N_ON_HIGH_DIFF):
-                raise UnexpectedValueError("Number of terms can be set manually only on highest difficulty.")
+                raise ValueError("Number of terms can be set manually only on highest difficulty.")
         self.difficulty = difficulty
         self.var_name = var_name
         self.x_terms = x_terms

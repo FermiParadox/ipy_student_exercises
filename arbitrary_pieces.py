@@ -9,14 +9,6 @@ import languages
 
 
 # ---------------------------------------------------------------------------------
-class UnexpectedValueError(Exception):
-    """Used for Exceptions that should not be handled,
-    instead of an existing Exception (to prevent accidental handling during `try`).
-    """
-    pass
-
-
-# ---------------------------------------------------------------------------------
 # PLACEHOLDER
 
 class PlaceholderUsedError(Exception):
@@ -135,10 +127,10 @@ def r_int(bounds, pos_neg_0='+-0', excluded=(), weights=None) -> int:
         b1, b2 = bounds
 
     if (not pos_neg_0) or (pos_neg_0 == '0'):
-        raise UnexpectedValueError('Need at least one of the following: {}.'.format(_MANDATORY_POS_NEG_0))
+        raise ValueError('Need at least one of the following: {}.'.format(_MANDATORY_POS_NEG_0))
     extra_chars = set(pos_neg_0) - _ALLOWED_POS_NEG_0
     if extra_chars:
-        raise UnexpectedValueError('Only {} are allowed. Found: {}.'.format(_ALLOWED_POS_NEG_0, extra_chars))
+        raise ValueError('Only {} are allowed. Found: {}.'.format(_ALLOWED_POS_NEG_0, extra_chars))
 
     nums = set(range(b1, b2+1)) - set(excluded)
     if '0' not in pos_neg_0:

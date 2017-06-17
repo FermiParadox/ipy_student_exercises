@@ -2,7 +2,7 @@ from unittest import TestCase
 from random import randint
 
 from tests import REPETITIONS
-from arbitrary_pieces import r_int, _ALLOWED_POS_NEG_0, UnexpectedValueError
+from arbitrary_pieces import r_int, _ALLOWED_POS_NEG_0
 
 
 class Test_r_int(TestCase):
@@ -61,14 +61,14 @@ class Test_r_int(TestCase):
         self.assertNotIn(0, s)
 
     def test_either_pos_or_neg_enforced(self):
-        self.assertRaises(UnexpectedValueError, r_int, 100, '0')
-        self.assertRaises(UnexpectedValueError, r_int, 100, '')
+        self.assertRaises(ValueError, r_int, 100, '0')
+        self.assertRaises(ValueError, r_int, 100, '')
 
     def test_posneg0_extra(self):
         from string import printable
         for l in set(printable)-_ALLOWED_POS_NEG_0:
             posneg0 = '-0+{}'.format(l)
-            self.assertRaises(UnexpectedValueError, r_int, 100, posneg0)
+            self.assertRaises(ValueError, r_int, 100, posneg0)
 
     def test_no_nums_for_given_args(self):
         for _ in range(REPETITIONS):
