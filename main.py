@@ -65,10 +65,8 @@ def paint_text(text_str, color_str):
     :param color_str: (str) Hexadecimal or color name.
     :return: (str)
     """
-
     if color_str in COLORS_TO_HEX_MAP:
         color_str = COLORS_TO_HEX_MAP[color_str]
-
     return '[color={color_str}]{text_str}[/color]'.format(text_str=text_str,
                                                           color_str=color_str)
 

@@ -43,28 +43,50 @@ class _PatternBase(str):
         and must be non-empty containers.
 
         :param compile_obj: The output of `re.compile` (used for visibility provided by IDE)
-        :param fullmatch: Container of strings that `fullmatch` the pattern.
+        :param fullmatch: Container of strings that `re.fullmatch` the pattern.
         :param no_fullmatch: (container)
-        :param two_matches: Container of strings that each contains 2 matches of the pattern.
+        :param two_matches: Container of strings that each contains exactly 2 matches of the pattern.
         :param kwargs: The rest of the kwargs of `str` class.
         :return: (str)
         """
+
         try:
             patt = compile_obj.pattern
-            inst = str.__new__(cls, patt)
         except AttributeError:
             # (`re.compile` objects contain `.pattern`)
             raise TypeError('`compile_obj` must be a `re.compile` object.')
-        if ('_' in patt) or (' ' in patt):
-            raise ValueError('Pattern must not include whitespaces or "_".')
-        if not (fullmatch and no_fullmatch and two_matches):
-            # No need to test if they are containers
-            # since unit-testing would fail anyway if they weren't.
-            raise ValueError('Expected non empty containers as match/mismatch examples.')
+        # TODO ensure it is indeed ignored in apk.
+        # Tests obj creation only during development
+        assert _PatternBase._test_object_creation(patt=patt,
+                                                  fullmatch=fullmatch,
+                                                  no_fullmatch=no_fullmatch,
+                                                  two_matches=two_matches)
+
+        inst = str.__new__(cls, patt)
         inst.__dict__.update({'with_sign': _MAYBE_PLUS_OR_MINUS_PATT + inst})
-        inst.__dict__.update({'fullmatch': fullmatch, 'no_fullmatch': no_fullmatch, 'two_matches': two_matches})
+        inst.__dict__.update(dict(
+            fullmatch=fullmatch,
+            no_fullmatch=no_fullmatch,
+            two_matches=two_matches))
         _PatternBase._check_duplicates_and_note_new_pattern(pattern=inst)
         return inst
+
+    @staticmethod
+    def _test_object_creation(patt, fullmatch, no_fullmatch, two_matches):
+        if ('_' in patt) or (' ' in patt):
+            raise ValueError('Pattern must not include whitespaces or "_".')
+        _containers = [fullmatch, no_fullmatch, two_matches]
+        if not all(_containers):
+            raise ValueError('Expected non empty containers as match/mismatch examples.')
+        for c in _containers:
+            if isinstance(c, str):
+                raise TypeError('Expected container (list, tuple, etc); got str instead.')
+            try:
+                for _ in c:
+                    break
+            except TypeError:
+                raise TypeError('Expected container (list, tuple, etc).')
+        return True
 
     @staticmethod
     def total_matches_within_bounds(m, bounds_str):
