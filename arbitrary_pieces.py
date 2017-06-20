@@ -204,7 +204,7 @@ def consecutive_operators_search(expr):
 ANY_NUM_SHORT_DESCRIPTION_MSG = languages.Message(
     texts_dct={
         languages.english: 'Any number.',
-        languages.greek: 'Οποιοσδήποτε αριθμός',
+        languages.greek: 'Οποιοσδήποτε\n αριθμός',
     })
 
 NO_SOLUTION_SHORT_DESCRIPTION_MSG = languages.Message(

@@ -11,17 +11,6 @@ config.read(CONFIG_PATH)
 SELECTED_LANGUAGE = config['LANGUAGE']['selected_language']
 
 
-class LanguageNotImplemented(Exception):
-    pass
-
-
-class EnglishMissingError(Exception):
-    pass
-
-
-class MissingTranslationWarning(Warning):
-    pass
-
 SUPPORTED_LANGUAGES = set()
 
 
@@ -45,13 +34,13 @@ greek = Language(name='greek',  native_name='ελληνικά')
 
 
 if SELECTED_LANGUAGE not in SUPPORTED_LANGUAGES:
-    raise LanguageNotImplemented('"{}" not implemented'.format(SELECTED_LANGUAGE))
+    raise NotImplementedError('"{}" not implemented'.format(SELECTED_LANGUAGE))
 
 
 class Message(str):
     def __new__(cls, texts_dct):
         if english not in texts_dct:
-            raise EnglishMissingError
+            raise NotImplementedError
         if SELECTED_LANGUAGE in texts_dct:
             s = texts_dct[SELECTED_LANGUAGE]
         else:
@@ -59,7 +48,7 @@ class Message(str):
             warnings.warn(
                 """Missing some translations in {} (will use english instead).
                 Check corresponding module.""".format(SELECTED_LANGUAGE),
-                MissingTranslationWarning)
+                Warning)
         inst = str.__new__(cls, s)
         return inst
 
@@ -84,7 +73,25 @@ class Message(str):
 ABOUT_MSG = Message(
     texts_dct={
         english: 'About',
-        greek: 'Σχετικά',
+        greek: u'Σχετικά',
+    })
+
+PLAY = Message(
+    texts_dct={
+        english: 'Play',
+        greek: 'Παιχνίδι',
+    })
+
+HISTORY = Message(
+    texts_dct={
+        english: 'History',
+        greek: 'Ιστορικό',
+    })
+
+TREASURES = Message(
+    texts_dct={
+        english: 'Treasures',
+        greek: 'Θησαυροί',
     })
 
 SOLVE_FOR_X_QUESTION_MSG = Message(
