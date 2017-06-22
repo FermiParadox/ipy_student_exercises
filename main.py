@@ -39,6 +39,7 @@ import languages
 
 __version__ = '0.0.1'
 
+# TODO find appropriate name
 APP_NAME = 'Free edu'
 STANDARD_BUTTON_HEIGHT = '30sp'
 
@@ -70,7 +71,7 @@ class MyProgressBar(Widget):
 
 
 # Class code below (including the corresponding in .kv file)
-# by Alexander Taylor
+# by Alexander Taylor (MIT license)
 # from https://github.com/kivy/kivy/wiki/Scrollable-Label
 class ConfinedTextLabel(Label):
     pass
@@ -97,13 +98,13 @@ class AttributionsBox(BoxLayout):
         self.popup.add_widget(box)
 
     @staticmethod
-    def image_path(im_name):
+    def third_parties_image_path(im_name):
         return '/'.join([THIRD_PARTIES_IMAGES_DIR, im_name])
 
     def populate_grid(self):
         for im_name, citation_obj in attributions.FIRST_IMAGE_TO_CITATION_MAP.items():
-            im_path = self.image_path(im_name=im_name)
-            b = Button(background_normal=im_path, size_hint=(None, None), width='50sp', height='50sp', border=(0,0,0,0))
+            im_path = self.third_parties_image_path(im_name=im_name)
+            b = Button(background_normal=im_path, size_hint=(None, None), width='50sp', height='50sp')
             b.image_name = im_name
             b.image_text = citation_obj.full_text()
             b.bind(on_release=self.update_popup_and_open)
@@ -111,7 +112,7 @@ class AttributionsBox(BoxLayout):
 
     def update_popup_and_open(self, *args):
         im_name = args[0].image_name
-        self.popup_image.source = self.image_path(im_name=im_name)
+        self.popup_image.source = self.third_parties_image_path(im_name=im_name)
         self.popup_text_label.text = args[0].image_text
         self.popup.open()
 
@@ -155,29 +156,33 @@ class LatexWidget(BoxLayout):
 
 
 class LicensesWidget(BoxLayout):
+    POPUP_TITLE_SIZE = '20sp'
 
     def __init__(self, **kwargs):
         super(LicensesWidget, self).__init__(orientation='vertical', **kwargs)
-        self.popup = Popup(size_hint=(.9, .7))
+        self.popup = Popup(size_hint=(.9, .7), title_size=self.POPUP_TITLE_SIZE)
         self.popup_content = ScrollLabel()
         self.popup.add_widget(self.popup_content)
         self.populate_widg()
 
     def populate_widg(self):
-        self.add_widget(Label(text=boldify('Licenses'), size_hint_y=None, height='40sp'))
+        self.add_widget(Label(text=boldify('Licenses'), font_size=self.POPUP_TITLE_SIZE, size_hint_y=None, height='40sp'))
         from about_module import LICENSES_DCT
         for _name, licence in LICENSES_DCT.items():
             name = _name.capitalize()
-            b = Button(text=name, bold=True, size_hint_y=None, height=STANDARD_BUTTON_HEIGHT, border=(0,0,0,0))
-            b.popup_title = boldify(txt_str=name)
+            b = Button(text=name, bold=True, size_hint_y=None, height=STANDARD_BUTTON_HEIGHT)
+            b.popup_title = name
             b.license_txt = licence
             b.bind(on_release=self.on_button_release)
             self.add_widget(b)
 
-    def on_button_release(self, *args):
-        self.popup.title = args[0].popup_title
-        self.popup_content.text = args[0].license_txt
+    def on_button_release(self, btn):
+        self.popup.title = boldify(txt_str=btn.popup_title)
+        self.popup_content.text = btn.license_txt
         self.popup.open()
+
+
+ANSWER_KEY_EQUALS = '{}='
 
 
 class AnswersInputBox(BoxLayout):
@@ -196,21 +201,23 @@ class AnswersInputBox(BoxLayout):
 
     def set_input_text_to_answer(self, *args):
         obj = args[0]
-        self.answers_given[obj.answer_name_] = obj.text
+        self.answers_given[obj.answer_name] = obj.text
 
     def populate_textinputs_box(self, *args):
         self.textinputs_box.clear_widgets()
         self.textinputs_lst = []
-        for a_key in self.exercise.expected_answers:
-            label_text = '{}= '.format(a_key)
-            single_text_box = BoxLayout(size_hint_y=None, height=STANDARD_BUTTON_HEIGHT)
-            single_text_box.add_widget(Label(text=label_text, size_hint_x=.2))
-            txt_input = TextInput(hint_text=languages.TYPE_ANSWER_PROMPT_MSG, multiline=False)
-            txt_input.answer_name_ = a_key
-            txt_input.bind(text=self.set_input_text_to_answer)
-            self.textinputs_lst.append(txt_input)
-            single_text_box.add_widget(txt_input)
-            self.textinputs_box.add_widget(single_text_box)
+        for answer_name in self.exercise.expected_answers:
+            box = BoxLayout(size_hint_y=None, height=STANDARD_BUTTON_HEIGHT)
+            self.textinputs_box.add_widget(box)
+
+            label_text = ANSWER_KEY_EQUALS.format(answer_name)
+            box.add_widget(Label(text=label_text, size_hint_x=.2))
+
+            t_input = TextInput(hint_text=languages.TYPE_ANSWER_PROMPT_MSG, multiline=False)
+            t_input.answer_name = answer_name
+            t_input.bind(text=self.set_input_text_to_answer)
+            box.add_widget(t_input)
+            self.textinputs_lst.append(t_input)
 
     def set_special_answer_to_answers(self, *args):
         obj = args[0]
@@ -224,8 +231,7 @@ class AnswersInputBox(BoxLayout):
         self.specials_buttons_box.clear_widgets()
         for a_class in self.exercise.special_answers_allowed:
             b = Button(text=a_class.button_text,
-                       size_hint_y=None, height=STANDARD_BUTTON_HEIGHT,
-                       border=(0,0,0,0))
+                       size_hint_y=None, height=STANDARD_BUTTON_HEIGHT)
             b.special_val_ = a_class
             b.bind(on_release=self.set_special_answer_to_answers)
             self.specials_buttons_box.add_widget(b)
@@ -246,17 +252,19 @@ class RevealedAnswersBox(BoxLayout):
     expected_answers_in_latex = DictProperty({'x_placeholder': 'placeholder'})
     reveal_button = ObjectProperty()
     answers_input_box = ObjectProperty()
+    check_answers_button = ObjectProperty()
 
     def __init__(self, **kwargs):
         super(RevealedAnswersBox, self).__init__(**kwargs)
         self.latex_widg = LatexWidget()
         self.special_answer_label = Label()
         self.main_content_box = BoxLayout(orientation='vertical')
+        self.main_content_box.add_widget(Label(text=languages.CORRECT_ANSWER_IS_MSG))
+        self.main_label_box = BoxLayout()
+        self.main_content_box.add_widget(self.main_label_box)
+
         self.user_reaction_options_box = UserReactionToRevealedAnswersBox()
         self.user_reaction_options_box.ids.ok_button.bind(on_release=self.on_ok_button_release)
-        self.main_content_box.add_widget(Label(text=languages.CORRECT_ANSWER_IS_MSG))
-        self.main_label_box = BoxLayout()   # main label goes in here
-        self.main_content_box.add_widget(self.main_label_box)
         self.main_content_box.add_widget(self.user_reaction_options_box)
 
     def _main_label(self):
@@ -282,13 +290,18 @@ class RevealedAnswersBox(BoxLayout):
         non_latex_s = ''
         for a_name in sorted(self.expected_answers_in_latex):
             a_val = self.expected_answers_in_latex[a_name]
-            non_latex_s += '{}={}'.format(a_name, a_val.strip('$'))
+            # (simply places "z=" at the start;
+            # different type of answers would need different implementation elsewhere too)
+            if non_latex_s:
+                non_latex_s += ', '
+            non_latex_s += ANSWER_KEY_EQUALS.format(a_name) + r'{}'.format(a_val.strip('$'))
         return '${}$'.format(non_latex_s)
 
     def on_ok_button_release(self, *args):
         self.clear_widgets()
         self.add_widget(Label())
         self.reveal_button.disabled = False
+        self.check_answers_button.disabled = False
         self.answers_input_box.disabled = False
         app.root.exercise = exercises.SolveForXLinear(difficulty=2)
 

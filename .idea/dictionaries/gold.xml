@@ -2,6 +2,7 @@
   <dictionary name="gold">
     <words>
       <w>fullmatch</w>
+      <w>textinputs</w>
     </words>
   </dictionary>
 </component>

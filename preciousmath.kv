@@ -14,6 +14,8 @@
     background_normal: 'own_images/simple_grey_button.png'
     background_down: 'own_images/simple_grey_button_pressed.png'
     background_disabled_normal: self.background_down
+    border: 0,0,0,0
+
 
 <GridLayout>:
     grid_background: main.BACKGROUND_COLOR
@@ -33,7 +35,7 @@
 
 
 # Class code below (including the corresponding in main.py)
-# by Alexander Taylor
+# by Alexander Taylor (MIT license)
 # from https://github.com/kivy/kivy/wiki/Scrollable-Label
 <ConfinedTextLabel>:
     color: 0,0,0,1
@@ -44,7 +46,7 @@
 <ScrollLabel>:
     text: ''
     color: 0,0,0,1
-    font_size: 15
+    font_size: '15sp'
     ConfinedTextLabel:
         text: root.text
         color: root.color
@@ -105,24 +107,19 @@
             Button:
                 text: languages.PLAY
                 bold: True
-                border: 0,0,0,0
                 on_release: root.load_slide(play_page)
             Button:
                 text: languages.TREASURES
-                border: 0,0,0,0
                 bold: True
                 on_release: root.load_slide(treasures_page)
             Button:
                 text: languages.HISTORY
-                border: 0,0,0,0
                 on_release: root.load_slide(history_page)
             Button:
                 text: languages.ABOUT_MSG
-                border: 0,0,0,0
                 on_release: root.load_slide(about_page)
             Button:
                 text: 'Attributions'
-                border: 0,0,0,0
                 on_release: root.load_slide(attributions_page)
 
     BoxLayout:
@@ -143,6 +140,7 @@
             exercise: root.exercise
             answers_given: {k: '' for k in root.expected_answers}
         Button:
+            id: check_answers_button
             text: languages.CHECK_MY_ANSWER_MSG
             background_color: 0,1,0,1
             border: 0,0,0,0
@@ -153,12 +151,12 @@
             id: reveal_button
             text: languages.REVEAL_ANSWER
             background_color: 1,0,0,1
-            border: 0,0,0,0
             size_hint: .4, None
             pos_hint: {'right': 1}
             height: main.STANDARD_BUTTON_HEIGHT
             on_release: revealed_answers_box.show_main_content()
             on_release: self.disabled = True
+            on_release: check_answers_button.disabled = True
             on_release: answers_input_box.disabled = True
         RevealedAnswersBox:
             id: revealed_answers_box
@@ -166,6 +164,7 @@
             pos_hint: {'center_x': .5, 'center_y': .5}
             reveal_button: reveal_button
             answers_input_box: answers_input_box
+            check_answers_button: check_answers_button
             expected_answers_in_latex: root.expected_answers_in_latex
             on_expected_answers_in_latex: self.create_main_label()
 
